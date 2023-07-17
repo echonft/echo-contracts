@@ -8,14 +8,9 @@ import "./Signer.sol";
 import "solmate/utils/ReentrancyGuard.sol";
 
 error TradeAlreadyExist();
-error TradeIsNotExpired();
 error TradeHasExpired();
-error InvalidExpiration();
 error InvalidCreator();
-error InvalidCounterparty();
 error InvalidAssets();
-error UserNotInTrade();
-error UserDontHaveEscrow();
 error InvalidPayment();
 
 contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
@@ -26,7 +21,6 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
     /// @dev Only executed trades are on chain to avoid replay attacks
     /// Trades are mapped by id
     mapping(string => bool) trades;
-
 
     function executeTrade(
         uint8 v,
@@ -49,7 +43,11 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
         }
 
         if (trade.expiresAt <= block.timestamp) {
-            revert InvalidExpiration();
+            revert TradeHasExpired();
+        }
+
+        if (msg.value != tradingFee) {
+            revert InvalidPayment();
         }
 
         _validateSignature(v, r, s, trade);

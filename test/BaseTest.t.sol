@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import './mock/Mocked721.t.sol';
-import './mock/MockedAnonContract.t.sol';
 import 'forge-std/Test.sol';
 import 'src/Echo.sol';
 
@@ -117,12 +116,12 @@ abstract contract BaseTest is Test {
         (v, r, s) = vm.sign(privateKey, digest);
     }
 
-    function executeTrade(
+    function _executeTrade(
         string memory id,
         address creator,
-        address counter
+        address counter,
+        uint256 fees
     ) internal {
-        vm.prank(creator);
         Trade memory trade = Trade({
             id: id,
             creator: creator,
@@ -131,7 +130,9 @@ abstract contract BaseTest is Test {
             creator721Assets: creator721Assets,
             counterparty721Assets: counterparty721Assets
         });
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-//        echo.executeTrade();
+        vm.prank(creator);
+        echo.executeTrade{value: fees}(v, r, s, trade);
     }
 }

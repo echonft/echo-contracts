@@ -6,7 +6,8 @@
   "scripts": {
     "pretty": "forge fmt",
     "build": "forge build",
-    "test": "forge test -vvv"
+    "test": "forge test -vvv",
+    "coverage": "forge coverage --report lcov && genhtml --branch-coverage --dark-mode -o ./coverage/ lcov.info"
   },
   "dependencies": {
     "prettier": "^2.8.8",
