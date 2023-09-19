@@ -3,3 +3,8 @@ out/
 *.DS_Store
 node_modules/
 .env
+
+## Tests
+/coverage
+lcov.info
+.gas-snapshot

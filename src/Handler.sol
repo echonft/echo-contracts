@@ -24,7 +24,6 @@ abstract contract Handler {
         address from,
         address to
     ) internal {
-        // TODO Maybe multicall?
         for (uint256 i = 0; i < tokens.length; ++i) {
             _transferERC721(tokens[i], from, to);
         }
