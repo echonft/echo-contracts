@@ -22,5 +22,4 @@ abstract contract Admin is Owned {
 
         _;
     }
-
 }

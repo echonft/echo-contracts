@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './BaseTest.t.sol';
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
+import "./BaseTest.t.sol";
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
 
 contract Trade721Test is BaseTest {
     function testCannotSwapEmptyCreatorAssets() public {
@@ -77,7 +77,7 @@ contract Trade721Test is BaseTest {
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
-        emit TradeExecuted('test', account1);
+        emit TradeExecuted("test", account1);
         echo.executeTrade(v, r, s, trade);
 
         // Assets are now swapped
@@ -104,7 +104,7 @@ contract Trade721Test is BaseTest {
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
-        emit TradeExecuted('test', account1);
+        emit TradeExecuted("test", account1);
         echo.executeTrade(v, r, s, trade);
 
         // Assets are now swapped
@@ -132,7 +132,7 @@ contract Trade721Test is BaseTest {
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
-        emit TradeExecuted('test', account1);
+        emit TradeExecuted("test", account1);
         echo.executeTrade(v, r, s, trade);
 
         // Assets are now swapped

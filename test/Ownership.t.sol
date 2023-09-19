@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './BaseTest.t.sol';
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
+import "./BaseTest.t.sol";
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
 
 contract OwnershipTest is BaseTest {
     /// Sender is not creator
@@ -45,7 +45,7 @@ contract OwnershipTest is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account3);
-        vm.expectRevert(bytes('ERC721: transfer from incorrect owner'));
+        vm.expectRevert(bytes("ERC721: transfer from incorrect owner"));
         echo.executeTrade(v, r, s, trade);
     }
 
@@ -64,7 +64,7 @@ contract OwnershipTest is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account1);
-        vm.expectRevert(bytes('ERC721: caller is not token owner or approved'));
+        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
         echo.executeTrade(v, r, s, trade);
     }
 }
