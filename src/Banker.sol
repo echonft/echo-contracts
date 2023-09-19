@@ -11,7 +11,7 @@ abstract contract Banker is Owned, Admin {
 
     /// Withdraw all funds available
     function withdraw(address account) external onlyOwner {
-        (bool success, ) = account.call{value: address(this).balance}("");
+        (bool success,) = account.call{value: address(this).balance}("");
         if (!success) {
             revert WithdrawFailed();
         }

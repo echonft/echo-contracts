@@ -4,10 +4,12 @@ module.exports = {
   singleQuote: true,
   trailingComma: 'all',
   useTabs: false,
+  plugins: ['prettier-plugin-solidity'],
   overrides: [
     {
-      files: 'src/**/*.sol',
+      files: '*.sol',
       options: {
+        parser: 'solidity-parse',
         printWidth: 100,
         tabWidth: 4,
         useTabs: false,

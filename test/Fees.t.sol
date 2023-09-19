@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './BaseTest.t.sol';
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
+import "./BaseTest.t.sol";
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
 
 contract FeesTest is BaseTest {
     function testRevertsWithoutFunds() public {
@@ -34,6 +34,7 @@ contract FeesTest is BaseTest {
         vm.expectRevert(InvalidPayment.selector);
         echo.executeTrade{value: 0.004 ether}(v, r, s, trade);
     }
+
     function testSucceedsWithFunds() public {
         // Set fees
         vm.prank(owner);

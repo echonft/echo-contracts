@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './BaseTest.t.sol';
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
+import "./BaseTest.t.sol";
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
 
 contract SignatureTest is BaseTest {
     /// Wrong signer

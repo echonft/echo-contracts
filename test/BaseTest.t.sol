@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
-import 'src/Echo.sol';
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
+import "src/Echo.sol";
 
 abstract contract BaseTest is Test {
     event TradeExecuted(string indexed id, address user);
@@ -20,8 +20,11 @@ abstract contract BaseTest is Test {
     address constant refer = address(1341);
 
     // For signing
-    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-    bytes32 private constant TRADE_TYPEHASH = keccak256("Trade(string id,address creator,address counterparty,uint256 expiresAt,ERC721Asset[] creator721Assets,ERC721Asset[] counterparty721Assets)ERC721Asset(address collection,uint64 id)");
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+    bytes32 private constant TRADE_TYPEHASH = keccak256(
+        "Trade(string id,address creator,address counterparty,uint256 expiresAt,ERC721Asset[] creator721Assets,ERC721Asset[] counterparty721Assets)ERC721Asset(address collection,uint64 id)"
+    );
 
     ERC721Asset ape1;
     ERC721Asset ape2;
@@ -52,8 +55,8 @@ abstract contract BaseTest is Test {
 
         echo = new Echo({owner: owner});
 
-        apes = new Mocked721('Apes', 'APE');
-        birds = new Mocked721('Birds', 'BIRD');
+        apes = new Mocked721("Apes", "APE");
+        birds = new Mocked721("Birds", "BIRD");
 
         apes.safeMint(account1, 1);
         apes.safeMint(account1, 2);
@@ -86,17 +89,13 @@ abstract contract BaseTest is Test {
     }
 
     function _signTrade(Trade memory trade, uint256 privateKey) internal view returns (uint8 v, bytes32 r, bytes32 s) {
-        uint chainId;
+        uint256 chainId;
         assembly {
             chainId := chainid()
         }
         bytes32 eip712DomainHash = keccak256(
             abi.encode(
-                EIP712_DOMAIN_TYPEHASH,
-                keccak256(bytes("ExecuteTrade")),
-                keccak256(bytes("1")),
-                chainId,
-                address(echo)
+                EIP712_DOMAIN_TYPEHASH, keccak256(bytes("ExecuteTrade")), keccak256(bytes("1")), chainId, address(echo)
             )
         );
 
@@ -116,12 +115,7 @@ abstract contract BaseTest is Test {
         (v, r, s) = vm.sign(privateKey, digest);
     }
 
-    function _executeTrade(
-        string memory id,
-        address creator,
-        address counter,
-        uint256 fees
-    ) internal {
+    function _executeTrade(string memory id, address creator, address counter, uint256 fees) internal {
         Trade memory trade = Trade({
             id: id,
             creator: creator,

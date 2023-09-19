@@ -9,21 +9,12 @@ struct ERC721Asset {
 }
 
 abstract contract Handler {
-
-    function _transferERC721(
-        ERC721Asset memory token,
-        address from,
-        address to
-    ) internal {
+    function _transferERC721(ERC721Asset memory token, address from, address to) internal {
         IERC721 collection = IERC721(token.collection);
         collection.safeTransferFrom(from, to, token.id);
     }
 
-    function _transferTokens(
-        ERC721Asset[] memory tokens,
-        address from,
-        address to
-    ) internal {
+    function _transferTokens(ERC721Asset[] memory tokens, address from, address to) internal {
         for (uint256 i = 0; i < tokens.length; ++i) {
             _transferERC721(tokens[i], from, to);
         }

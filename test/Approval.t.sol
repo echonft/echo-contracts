@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import './BaseTest.t.sol';
-import './mock/Mocked721.t.sol';
-import 'forge-std/Test.sol';
+import "./BaseTest.t.sol";
+import "./mock/Mocked721.t.sol";
+import "forge-std/Test.sol";
 
 contract ApprovalTest is BaseTest {
     /// Creator has not approved its apes
@@ -22,7 +22,7 @@ contract ApprovalTest is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account3);
-        vm.expectRevert(bytes('ERC721: caller is not token owner or approved'));
+        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
         echo.executeTrade(v, r, s, trade);
     }
 
@@ -46,7 +46,7 @@ contract ApprovalTest is BaseTest {
         vm.stopPrank();
 
         vm.prank(account1);
-        vm.expectRevert(bytes('ERC721: caller is not token owner or approved'));
+        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
         echo.executeTrade(v, r, s, trade);
     }
 
@@ -71,7 +71,7 @@ contract ApprovalTest is BaseTest {
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
-        emit TradeExecuted('test', account1);
+        emit TradeExecuted("test", account1);
         echo.executeTrade(v, r, s, trade);
 
         // Assets are now swapped
