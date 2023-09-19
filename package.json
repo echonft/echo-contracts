@@ -12,7 +12,7 @@
     "pretty": "forge fmt",
     "build": "forge build",
     "test": "forge test -vvv",
-    "coverage": "forge coverage --report lcov && genhtml --branch-coverage --dark-mode -o ./coverage/ lcov.info",
+    "coverage": "forge coverage --report lcov",
     "prepare": "husky install"
   },
   "devDependencies": {

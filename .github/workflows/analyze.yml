@@ -42,6 +42,16 @@ jobs:
           # due to non-deterministic fuzzing (but still use pseudo-random fuzzing seeds)
           FOUNDRY_FUZZ_SEED: 0x${{ github.event.pull_request.base.sha || github.sha }}
 
+      - name: Run Coverage
+        run: forge coverage --report lcov
+
+      - name: Coverage Report
+        uses: aGallea/tests-coverage-report@v1
+        with:
+          min-coverage-percentage: '90'
+          fail-under-coverage-percentage: 'false'
+          lcov-path: './lcov.info'
+
       - name: Compare gas reports
         uses: Rubilmax/foundry-gas-diff@v3.16
         with:
