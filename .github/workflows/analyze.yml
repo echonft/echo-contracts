@@ -51,6 +51,7 @@ jobs:
           min-coverage-percentage: '90'
           fail-under-coverage-percentage: 'false'
           lcov-path: './lcov.info'
+          diffcover-ref: 'lcov'
 
       - name: Compare gas reports
         uses: Rubilmax/foundry-gas-diff@v3.16
