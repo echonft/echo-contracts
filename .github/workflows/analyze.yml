@@ -61,3 +61,4 @@ jobs:
         uses: romeovs/lcov-reporter-action@v0.2.21
         with:
           lcov-file: lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
