@@ -42,8 +42,10 @@ contract AdminTest is BaseTest {
         vm.prank(owner);
         echo.setFees(0.005 ether);
 
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
         _executeTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(account1);
@@ -56,8 +58,10 @@ contract AdminTest is BaseTest {
         vm.prank(owner);
         echo.setFees(0.005 ether);
 
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
         _executeTrade("test", account1, account2, 0.005 ether);
 
         assertEq(address(echo).balance, 0.005 ether);
@@ -72,8 +76,10 @@ contract AdminTest is BaseTest {
         vm.prank(owner);
         echo.setFees(0.005 ether);
 
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
         _executeTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(owner);

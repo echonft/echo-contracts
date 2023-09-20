@@ -8,15 +8,20 @@ import "forge-std/Test.sol";
 contract SignatureTest is BaseTest {
     /// Wrong signer
     function testInvalidSignature() public {
-        creator721Assets.push(ape3);
-        counterparty721Assets.push(bird3);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape3Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird3Id);
+
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         uint256 wrongPrivateKey = _generatePrivateKey(testMnemonic, 1);
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, wrongPrivateKey);

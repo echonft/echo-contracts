@@ -8,16 +8,20 @@ import "forge-std/Test.sol";
 contract ApprovalTest is BaseTest {
     /// Creator has not approved its apes
     function testCannotExecuteTradeIfCreatorDidNotApprove() public {
-        creator721Assets.push(ape3);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape3Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account3,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -28,16 +32,20 @@ contract ApprovalTest is BaseTest {
 
     /// Counterparty has not approved its birds
     function testCannotExecuteTradeIfCounterpartyDidNotApprove() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -56,16 +64,20 @@ contract ApprovalTest is BaseTest {
         assertEq(apes.ownerOf(1), account1);
         assertEq(birds.ownerOf(1), account2);
 
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 

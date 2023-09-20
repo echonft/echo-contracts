@@ -7,16 +7,20 @@ import "forge-std/Test.sol";
 
 contract Trade721Test is BaseTest {
     function testCannotSwapEmptyCreatorAssets() public {
-        counterparty721Assets.push(bird1);
-        counterparty721Assets.push(bird2);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -26,15 +30,18 @@ contract Trade721Test is BaseTest {
     }
 
     function testCannotSwapEmptyCounterpartyAssets() public {
-        creator721Assets.push(ape1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -49,8 +56,10 @@ contract Trade721Test is BaseTest {
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -61,17 +70,22 @@ contract Trade721Test is BaseTest {
 
     /// @dev Swap: 1 ape for 2 birds
     function testSwapOneForTwo() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
-        counterparty721Assets.push(bird2);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -88,17 +102,22 @@ contract Trade721Test is BaseTest {
 
     /// @dev Swap: 2 apes for 1 bird
     function testSwapTwoForOne() public {
-        creator721Assets.push(ape1);
-        creator721Assets.push(ape2);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape2Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -115,18 +134,24 @@ contract Trade721Test is BaseTest {
 
     /// @dev Swap: 2 apes for 2 birds
     function testSwapTwoForTwo() public {
-        creator721Assets.push(ape1);
-        creator721Assets.push(ape2);
-        counterparty721Assets.push(bird1);
-        counterparty721Assets.push(bird2);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape2Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
@@ -147,18 +172,24 @@ contract Trade721Test is BaseTest {
         testSwapTwoForTwo();
 
         // Second swap with same Id
-        counterparty721Assets.push(ape1);
-        counterparty721Assets.push(ape2);
-        creator721Assets.push(bird1);
-        creator721Assets.push(bird2);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape2Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 

@@ -33,7 +33,11 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
             revert InvalidCreator();
         }
 
-        if (trade.creator721Assets.length == 0 || trade.counterparty721Assets.length == 0) {
+        if (
+            trade.creatorCollections.length == 0 || trade.counterpartyCollections.length == 0
+                || trade.creatorCollections.length != trade.creatorIds.length
+                || trade.counterpartyCollections.length != trade.counterpartyIds.length
+        ) {
             revert InvalidAssets();
         }
 
@@ -48,10 +52,20 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
         _validateSignature(v, r, s, trade);
 
         // Transfer creator's assets
-        _transferTokens({tokens: trade.creator721Assets, from: trade.creator, to: trade.counterparty});
+        _transferTokens({
+            collections: trade.creatorCollections,
+            ids: trade.creatorIds,
+            from: trade.creator,
+            to: trade.counterparty
+        });
 
         // Transfer counterparty's assets
-        _transferTokens({tokens: trade.counterparty721Assets, from: trade.counterparty, to: trade.creator});
+        _transferTokens({
+            collections: trade.counterpartyCollections,
+            ids: trade.counterpartyIds,
+            from: trade.counterparty,
+            to: trade.creator
+        });
 
         // Add trade to list to avoid replay and duplicates
         trades[trade.id] = true;

@@ -3,20 +3,18 @@ pragma solidity ^0.8.18;
 
 import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 
-struct ERC721Asset {
-    address collection;
-    uint64 id;
-}
+error LengthMismatch();
 
 abstract contract Handler {
-    function _transferERC721(ERC721Asset memory token, address from, address to) internal {
-        IERC721 collection = IERC721(token.collection);
-        collection.safeTransferFrom(from, to, token.id);
+    function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {
+        IERC721 collection = IERC721(collectionAddress);
+        collection.safeTransferFrom(from, to, id);
     }
 
-    function _transferTokens(ERC721Asset[] memory tokens, address from, address to) internal {
-        for (uint256 i = 0; i < tokens.length; ++i) {
-            _transferERC721(tokens[i], from, to);
+    function _transferTokens(address[] memory collections, uint256[] memory ids, address from, address to) internal {
+        if (collections.length != ids.length) revert LengthMismatch();
+        for (uint256 i = 0; i < collections.length; ++i) {
+            _transferERC721(collections[i], ids[i], from, to);
         }
     }
 }

@@ -12,15 +12,17 @@ struct Trade {
     address creator;
     address counterparty;
     uint256 expiresAt;
-    ERC721Asset[] creator721Assets;
-    ERC721Asset[] counterparty721Assets;
+    address[] creatorCollections;
+    uint256[] creatorIds;
+    address[] counterpartyCollections;
+    uint256[] counterpartyIds;
 }
 
 abstract contract Signer {
     bytes32 private constant EIP712_DOMAIN_TYPEHASH =
         keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     bytes32 private constant TRADE_TYPEHASH = keccak256(
-        "Trade(string id,address creator,address counterparty,uint256 expiresAt,ERC721Asset[] creator721Assets,ERC721Asset[] counterparty721Assets)ERC721Asset(address collection,uint64 id)"
+        "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
 
     function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade memory trade) internal view {
@@ -41,8 +43,10 @@ abstract contract Signer {
                 trade.creator,
                 trade.counterparty,
                 trade.expiresAt,
-                trade.creator721Assets,
-                trade.counterparty721Assets
+                trade.creatorCollections,
+                trade.creatorIds,
+                trade.counterpartyCollections,
+                trade.counterpartyIds
             )
         );
 

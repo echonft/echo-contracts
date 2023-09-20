@@ -7,16 +7,21 @@ import "forge-std/Test.sol";
 
 contract ExpirationTest is BaseTest {
     function testExpiresAtCurrentBlock() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+
         uint256 expired = block.timestamp;
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: expired,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
         vm.prank(account1);
@@ -25,16 +30,21 @@ contract ExpirationTest is BaseTest {
     }
 
     function testExpiresBeforeCurrentBlock() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+
         uint256 expired = block.timestamp - 1;
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: expired,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
         vm.prank(account1);
