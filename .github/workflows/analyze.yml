@@ -30,30 +30,14 @@ jobs:
         id: build
 
       # Run tests
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
-
       - name: Run tests
-        run: forge test --gas-report > gasreport.ansi
+        run: forge test -vvv --gas-report > gasreport.ansi
         env:
           # make fuzzing semi-deterministic to avoid noisy gas cost estimation
           # due to non-deterministic fuzzing (but still use pseudo-random fuzzing seeds)
           FOUNDRY_FUZZ_SEED: 0x${{ github.event.pull_request.base.sha || github.sha }}
 
-      - name: Run Coverage
-        run: forge coverage --report lcov
-
-      - name: Coverage Report
-        uses: aGallea/tests-coverage-report@v1
-        with:
-          min-coverage-percentage: '90'
-          fail-under-coverage-percentage: 'false'
-          lcov-path: './lcov.info'
-          diffcover-ref: 'lcov'
-          show-junit: 'false'
-
+      # Compare gas reports
       - name: Compare gas reports
         uses: Rubilmax/foundry-gas-diff@v3.16
         with:
@@ -69,3 +53,11 @@ jobs:
           # delete the comment in case changes no longer impact gas costs
           delete: ${{ !steps.gas_diff.outputs.markdown }}
           message: ${{ steps.gas_diff.outputs.markdown }}
+
+      - name: Run Coverage
+        run: forge coverage --report lcov
+
+      - name: Report coverage
+        uses: romeovs/lcov-reporter-action@v0.2.21
+        with:
+          lcov-file: lcov.info
