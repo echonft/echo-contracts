@@ -42,6 +42,9 @@ abstract contract BaseTest is Test {
     address account2;
     uint256 account2PrivateKey;
 
+    // add this to be excluded from coverage report
+    function test() public {}
+
     function setUp() public {
         // Generate account2 from mnemonic to get private key.
         account2PrivateKey = _generatePrivateKey(testMnemonic, 0);

@@ -9,4 +9,7 @@ contract Mocked721 is ERC721 {
     function safeMint(address to, uint256 tokenId) public {
         _safeMint(to, tokenId);
     }
+
+    // add this to be excluded from coverage report
+    function test() public {}
 }
