@@ -10,7 +10,7 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  check:
+  test:
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
