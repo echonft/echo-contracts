@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.18;
 
 import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
@@ -41,6 +41,9 @@ abstract contract BaseTest is Test {
     string constant testMnemonic = "test test test test test test test test test test test junk";
     address account2;
     uint256 account2PrivateKey;
+
+    // add this to be excluded from coverage report
+    function test() public {}
 
     function setUp() public {
         // Generate account2 from mnemonic to get private key.
