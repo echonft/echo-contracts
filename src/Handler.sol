@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import "solmate/tokens/ERC721.sol";
 
 error LengthMismatch();
 
 abstract contract Handler {
     function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {
-        IERC721 collection = IERC721(collectionAddress);
+        ERC721 collection = ERC721(collectionAddress);
         collection.safeTransferFrom(from, to, id);
     }
 
