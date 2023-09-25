@@ -3,9 +3,11 @@ pragma solidity ^0.8.18;
 
 import "solmate/utils/ReentrancyGuard.sol";
 import "./Handler.sol";
+import "forge-std/console.sol";
+import "solady/src/utils/ECDSA.sol";
+import "solady/src/utils/EIP712.sol";
 
 error InvalidSignature();
-error ECDSAInvalidSignature();
 
 struct Trade {
     string id;
@@ -18,25 +20,28 @@ struct Trade {
     uint256[] counterpartyIds;
 }
 
-abstract contract Signer {
-    bytes32 private constant EIP712_DOMAIN_TYPEHASH =
-        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+abstract contract Signer is EIP712 {
+    using ECDSA for bytes32;
+
     bytes32 private constant TRADE_TYPEHASH = keccak256(
         "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
 
-    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade memory trade) internal view {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        bytes32 eip712DomainHash = keccak256(
-            abi.encode(
-                EIP712_DOMAIN_TYPEHASH, keccak256(bytes("ExecuteTrade")), keccak256(bytes("1")), chainId, address(this)
-            )
-        );
+    function _domainNameAndVersion() internal pure override returns (string memory name, string memory version) {
+        name = "Echo";
+        version = "1";
+    }
 
-        bytes32 hashStruct = keccak256(
+    function hashTypedData(bytes32 structHash) external view returns (bytes32) {
+        return _hashTypedData(structHash);
+    }
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        return _domainSeparator();
+    }
+
+    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade memory trade) internal view {
+        bytes32 structHash = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
                 trade.id,
@@ -49,11 +54,13 @@ abstract contract Signer {
                 trade.counterpartyIds
             )
         );
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.DOMAIN_SEPARATOR(), structHash));
+        address signer = ECDSA.recover(hash, v, r, s);
 
-        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
-        address signer = ecrecover(hash, v, r, s);
+        console.logAddress(signer);
+        console.logAddress(trade.counterparty);
+        console.logAddress(trade.creator);
 
         if (signer != trade.counterparty) revert InvalidSignature();
-        if (signer == address(0)) revert ECDSAInvalidSignature();
     }
 }

@@ -2,15 +2,62 @@
 pragma solidity ^0.8.18;
 
 import "./BaseTest.t.sol";
-import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
 
-contract Trade721Test is BaseTest {
-    function testCannotSwapEmptyCreatorAssets() public {
+contract WrongAssetsTest is BaseTest {
+    function testCannotTradeLongerCreatorIds() public {
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        creator721Ids.push(ape2Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
+
+        Trade memory trade = Trade({
+            id: "test",
+            creator: account1,
+            counterparty: account2,
+            expiresAt: in6hours,
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
+        });
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidAssets.selector);
+        echo.executeTrade(v, r, s, trade);
+    }
+
+    function testCannotTradeLongerCreatorCollections() public {
+        creator721Collections.push(apeAddress);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+
+        Trade memory trade = Trade({
+            id: "test",
+            creator: account1,
+            counterparty: account2,
+            expiresAt: in6hours,
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
+        });
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidAssets.selector);
+        echo.executeTrade(v, r, s, trade);
+    }
+
+    function testCannotTradeLongerCounterpartyIds() public {
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
         counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
@@ -30,9 +77,12 @@ contract Trade721Test is BaseTest {
         echo.executeTrade(v, r, s, trade);
     }
 
-    function testCannotSwapEmptyCounterpartyAssets() public {
+    function testCannotTradeLongerCounterpartyCollections() public {
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
 
         Trade memory trade = Trade({
             id: "test",
@@ -51,32 +101,13 @@ contract Trade721Test is BaseTest {
         echo.executeTrade(v, r, s, trade);
     }
 
-    function testCannotSwapEmptyAssets() public {
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        vm.prank(account1);
-        vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, trade);
-    }
-
-    // @dev Swap: 1 ape for 2 birds
-    function testSwapOneForTwo() public {
+    function testCannotTradeSameCreatorAssets() public {
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird2Id);
 
         Trade memory trade = Trade({
             id: "test",
@@ -91,22 +122,15 @@ contract Trade721Test is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account1);
-        vm.expectEmit(true, true, true, true);
-        emit TradeExecuted("test", account1);
+        vm.expectRevert("WRONG_FROM");
         echo.executeTrade(v, r, s, trade);
-
-        // Assets are now swapped
-        assertEq(apes.ownerOf(1), account2);
-        assertEq(birds.ownerOf(1), account1);
-        assertEq(birds.ownerOf(2), account1);
     }
 
-    // @dev Swap: 2 apes for 1 bird
-    function testSwapTwoForOne() public {
+    function testCannotTradeSameCounterpartyAssets() public {
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape1Id);
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape2Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
 
@@ -123,83 +147,7 @@ contract Trade721Test is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account1);
-        vm.expectEmit(true, true, true, true);
-        emit TradeExecuted("test", account1);
-        echo.executeTrade(v, r, s, trade);
-
-        // Assets are now swapped
-        assertEq(apes.ownerOf(1), account2);
-        assertEq(apes.ownerOf(2), account2);
-        assertEq(birds.ownerOf(1), account1);
-    }
-
-    // @dev Swap: 2 apes for 2 birds
-    function testSwapTwoForTwo() public {
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape2Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird2Id);
-
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        console.logUint(v);
-        console.logBytes32(r);
-        console.logBytes32(s);
-
-        vm.prank(account1);
-        vm.expectEmit(true, true, true, true);
-        emit TradeExecuted("test", account1);
-        echo.executeTrade(v, r, s, trade);
-
-        // Assets are now swapped
-        assertEq(apes.ownerOf(1), account2);
-        assertEq(apes.ownerOf(2), account2);
-        assertEq(birds.ownerOf(1), account1);
-        assertEq(birds.ownerOf(2), account1);
-    }
-
-    function testCannotReuseTradeId() public {
-        // Execute initial swap
-        testSwapTwoForTwo();
-
-        // Second swap with same Id
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape2Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird2Id);
-
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        vm.prank(account1);
-        vm.expectRevert(TradeAlreadyExist.selector);
+        vm.expectRevert("WRONG_FROM");
         echo.executeTrade(v, r, s, trade);
     }
 }

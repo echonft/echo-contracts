@@ -20,10 +20,8 @@ abstract contract BaseTest is Test {
     address constant refer = address(1341);
 
     // For signing
-    bytes32 private constant EIP712_DOMAIN_TYPEHASH =
-        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-    bytes32 private constant TRADE_TYPEHASH = keccak256(
-        "Trade(string id,address creator,address counterparty,uint256 expiresAt,ERC721Asset[] creator721Assets,ERC721Asset[] counterparty721Assets)ERC721Asset(address collection,uint64 id)"
+    bytes32 internal constant TRADE_TYPEHASH = keccak256(
+        "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
 
     address apeAddress;
@@ -98,16 +96,6 @@ abstract contract BaseTest is Test {
     }
 
     function _signTrade(Trade memory trade, uint256 privateKey) internal view returns (uint8 v, bytes32 r, bytes32 s) {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        bytes32 eip712DomainHash = keccak256(
-            abi.encode(
-                EIP712_DOMAIN_TYPEHASH, keccak256(bytes("ExecuteTrade")), keccak256(bytes("1")), chainId, address(echo)
-            )
-        );
-
         bytes32 hashStruct = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
@@ -122,7 +110,7 @@ abstract contract BaseTest is Test {
             )
         );
 
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.DOMAIN_SEPARATOR(), hashStruct));
         (v, r, s) = vm.sign(privateKey, digest);
     }
 

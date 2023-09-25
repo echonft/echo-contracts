@@ -6,7 +6,7 @@ import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
 contract ApprovalTest is BaseTest {
-    /// Creator has not approved its apes
+    // Creator has not approved its apes
     function testCannotExecuteTradeIfCreatorDidNotApprove() public {
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape3Id);
@@ -26,7 +26,7 @@ contract ApprovalTest is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account3);
-        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
+        vm.expectRevert(bytes("NOT_AUTHORIZED"));
         echo.executeTrade(v, r, s, trade);
     }
 
@@ -54,7 +54,7 @@ contract ApprovalTest is BaseTest {
         vm.stopPrank();
 
         vm.prank(account1);
-        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
+        vm.expectRevert(bytes("NOT_AUTHORIZED"));
         echo.executeTrade(v, r, s, trade);
     }
 
