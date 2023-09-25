@@ -110,7 +110,7 @@ abstract contract BaseTest is Test {
             )
         );
 
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.DOMAIN_SEPARATOR(), hashStruct));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), hashStruct));
         (v, r, s) = vm.sign(privateKey, digest);
     }
 

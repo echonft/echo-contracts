@@ -60,7 +60,7 @@ contract SignatureTest is BaseTest {
                 trade.counterpartyIds
             )
         );
-        bytes32 expectedDigest = keccak256(abi.encodePacked("\x19\x01", echo.DOMAIN_SEPARATOR(), structHash));
+        bytes32 expectedDigest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), structHash));
         // Check hash struct
         assertEq(echo.hashTypedData(structHash), expectedDigest);
 
@@ -80,7 +80,7 @@ contract SignatureTest is BaseTest {
             )
         );
 
-        assertEq(echo.DOMAIN_SEPARATOR(), expectedDomainSeparator);
+        assertEq(echo.domainSeparator(), expectedDomainSeparator);
     }
 
     struct _testEIP5267Variables {

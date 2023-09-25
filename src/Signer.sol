@@ -36,7 +36,7 @@ abstract contract Signer is EIP712 {
         return _hashTypedData(structHash);
     }
 
-    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+    function domainSeparator() external view returns (bytes32) {
         return _domainSeparator();
     }
 
@@ -54,7 +54,7 @@ abstract contract Signer is EIP712 {
                 trade.counterpartyIds
             )
         );
-        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.DOMAIN_SEPARATOR(), structHash));
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
         address signer = ECDSA.recover(hash, v, r, s);
 
         console.logAddress(signer);
