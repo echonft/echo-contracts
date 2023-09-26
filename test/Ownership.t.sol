@@ -6,19 +6,25 @@ import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
 contract OwnershipTest is BaseTest {
-    /// Sender is not creator
+    // Sender is not creator
     function testCannotExecuteTradeIfNotCreator() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+
         // Counterparty
         vm.prank(account2);
         vm.expectRevert(InvalidCreator.selector);
@@ -30,41 +36,51 @@ contract OwnershipTest is BaseTest {
         echo.executeTrade(v, r, s, trade);
     }
 
-    // Creator
+    // Creator is not owner
     function testCannotExecuteTradeIfCreatorNotOwner() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird1);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+
         Trade memory trade = Trade({
             id: "test",
             creator: account3,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account3);
-        vm.expectRevert(bytes("ERC721: transfer from incorrect owner"));
+        vm.expectRevert(bytes("WRONG_FROM"));
         echo.executeTrade(v, r, s, trade);
     }
 
     // TODO Should be the same error message as the other?
+    // Counterparty is not owner
     function testCannotExecuteTradeIfCounterpartyNotOwner() public {
-        creator721Assets.push(ape1);
-        counterparty721Assets.push(bird3);
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird3Id);
         Trade memory trade = Trade({
             id: "test",
             creator: account1,
             counterparty: account2,
             expiresAt: in6hours,
-            creator721Assets: creator721Assets,
-            counterparty721Assets: counterparty721Assets
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.prank(account1);
-        vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
+        vm.expectRevert(bytes("WRONG_FROM"));
         echo.executeTrade(v, r, s, trade);
     }
 }
