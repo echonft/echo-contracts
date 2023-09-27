@@ -2,13 +2,20 @@
 pragma solidity ^0.8.18;
 
 import "./mock/Mocked721.t.sol";
+import "./mock/MockHandler.t.sol";
 import "forge-std/Test.sol";
 import "src/Echo.sol";
 
 abstract contract BaseTest is Test {
+    // Exclude from coverage report
+    function test() public {}
+
     event TradeExecuted(string indexed id, address user);
 
     Echo echo;
+    // To test internal function as it's impossible to reach the code
+    // from echo (echo also checks for length)
+    MockedHandler handler;
 
     Mocked721 apes;
     Mocked721 birds;
@@ -44,9 +51,6 @@ abstract contract BaseTest is Test {
     address account2;
     uint256 account2PrivateKey;
 
-    // add this to be excluded from coverage report
-    function test() public {}
-
     function setUp() public {
         // Generate account2 from mnemonic to get private key.
         account2PrivateKey = _generatePrivateKey(testMnemonic, 0);
@@ -59,6 +63,7 @@ abstract contract BaseTest is Test {
         vm.deal(account4, 100 ether);
 
         echo = new Echo({owner: owner});
+        handler = new MockedHandler();
 
         apes = new Mocked721("Apes", "APE");
         birds = new Mocked721("Birds", "BIRD");

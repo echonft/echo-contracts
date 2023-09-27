@@ -5,6 +5,9 @@ import "solmate/tokens/ERC721.sol";
 import "solady/src/utils/LibString.sol";
 
 contract Mocked721 is ERC721 {
+    // Exclude from coverage report
+    function test() public {}
+
     // The tokenId of the next token to be minted.
     uint256 internal _currentIndex;
     string private baseURI;
@@ -36,7 +39,4 @@ contract Mocked721 is ERC721 {
     function _baseURI() internal view returns (string memory) {
         return baseURI;
     }
-
-    // add this to be excluded from coverage report
-    function test() public {}
 }

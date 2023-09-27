@@ -5,6 +5,9 @@ import "forge-std/Script.sol";
 import "../test/mock/Mocked721.t.sol";
 
 contract DeployNFT is Script {
+    // Exclude from coverage report
+    function test() public {}
+
     function run() external {
         vm.startBroadcast();
 

@@ -87,4 +87,22 @@ contract AdminTest is BaseTest {
         assertEq(account3.balance, 100 ether + 0.005 ether);
         assertEq(address(echo).balance, 0);
     }
+
+    function testCannotWithdrawToContractIfOwner() public {
+        // Set fees
+        vm.prank(owner);
+        echo.setFees(0.005 ether);
+
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape1Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird1Id);
+        _executeTrade("test", account1, account2, 0.005 ether);
+
+        vm.prank(owner);
+        vm.expectRevert(WithdrawFailed.selector);
+        echo.withdraw(address(echo));
+        assertEq(account3.balance, 100 ether);
+        assertEq(address(echo).balance, 0.005 ether);
+    }
 }
