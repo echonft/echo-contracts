@@ -27,6 +27,11 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(apes.ownerOf(2), account1);
+        assertEq(birds.ownerOf(1), account2);
     }
 
     function testCannotTradeLongerCreatorCollections() public {
@@ -51,6 +56,10 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(birds.ownerOf(1), account2);
     }
 
     function testCannotTradeLongerCounterpartyIds() public {
@@ -75,6 +84,11 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(birds.ownerOf(1), account2);
+        assertEq(birds.ownerOf(2), account2);
     }
 
     function testCannotTradeLongerCounterpartyCollections() public {
@@ -99,6 +113,10 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(birds.ownerOf(1), account2);
     }
 
     function testCannotTradeSameCreatorAssets() public {
@@ -124,6 +142,10 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(birds.ownerOf(1), account2);
     }
 
     function testCannotTradeSameCounterpartyAssets() public {
@@ -149,5 +171,9 @@ contract WrongAssetsTest is BaseTest {
         vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
         echo.executeTrade(v, r, s, trade);
+
+        // Assets are not swapped
+        assertEq(apes.ownerOf(1), account1);
+        assertEq(birds.ownerOf(1), account2);
     }
 }
