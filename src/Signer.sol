@@ -43,14 +43,14 @@ abstract contract Signer is EIP712 {
         bytes32 structHash = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
-                trade.id,
+                keccak256(bytes(trade.id)),
                 trade.creator,
                 trade.counterparty,
                 trade.expiresAt,
-                trade.creatorCollections,
-                trade.creatorIds,
-                trade.counterpartyCollections,
-                trade.counterpartyIds
+                keccak256(abi.encodePacked(trade.creatorCollections)), // address[]
+                keccak256(abi.encodePacked(trade.creatorIds)), // uint256[]
+                keccak256(abi.encodePacked(trade.counterpartyCollections)), // address[]
+                keccak256(abi.encodePacked(trade.counterpartyIds)) // uint256[]
             )
         );
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
