@@ -4,7 +4,6 @@ pragma solidity ^0.8.18;
 import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
 
 contract Trade721Test is BaseTest {
     function testCannotSwapEmptyCreatorAssets() public {
@@ -155,10 +154,6 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        console.logUint(v);
-        console.logBytes32(r);
-        console.logBytes32(s);
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);

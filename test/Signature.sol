@@ -66,7 +66,7 @@ contract SignatureTest is BaseTest {
 
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
         address recoveredAddress = ecrecover(expectedDigest, v, r, s);
-        assertEq(recoveredAddress, account2);
+        assertEq(recoveredAddress, trade.counterparty);
     }
 
     function testDomainSeparator() public {
