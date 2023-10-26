@@ -3,7 +3,6 @@ pragma solidity ^0.8.18;
 
 import "solmate/utils/ReentrancyGuard.sol";
 import "./Handler.sol";
-import "forge-std/console.sol";
 import "solady/src/utils/ECDSA.sol";
 import "solady/src/utils/EIP712.sol";
 
@@ -44,22 +43,18 @@ abstract contract Signer is EIP712 {
         bytes32 structHash = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
-                trade.id,
+                keccak256(bytes(trade.id)),
                 trade.creator,
                 trade.counterparty,
                 trade.expiresAt,
-                trade.creatorCollections,
-                trade.creatorIds,
-                trade.counterpartyCollections,
-                trade.counterpartyIds
+                keccak256(abi.encodePacked(trade.creatorCollections)), // address[]
+                keccak256(abi.encodePacked(trade.creatorIds)), // uint256[]
+                keccak256(abi.encodePacked(trade.counterpartyCollections)), // address[]
+                keccak256(abi.encodePacked(trade.counterpartyIds)) // uint256[]
             )
         );
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
         address signer = ECDSA.recover(hash, v, r, s);
-
-        console.logAddress(signer);
-        console.logAddress(trade.counterparty);
-        console.logAddress(trade.creator);
 
         if (signer != trade.counterparty) revert InvalidSignature();
     }

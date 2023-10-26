@@ -22,13 +22,16 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
     /// Trades are mapped by id
     mapping(string => bool) trades;
 
-    function executeTrade(uint8 v, bytes32 r, bytes32 s, Trade memory trade)
+    function executeTrade(uint8 v, bytes32 r, bytes32 s, Trade calldata trade)
         external
         payable
         nonReentrant
         notPaused
-        tradeExists(trade.id)
     {
+        if (trades[trade.id]) {
+            revert TradeAlreadyExist();
+        }
+
         if (trade.creator != msg.sender) {
             revert InvalidCreator();
         }
@@ -71,13 +74,5 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
         trades[trade.id] = true;
 
         emit TradeExecuted(trade.id, msg.sender);
-    }
-
-    modifier tradeExists(string memory id) {
-        if (trades[id]) {
-            revert TradeAlreadyExist();
-        }
-
-        _;
     }
 }

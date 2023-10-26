@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "solmate/tokens/ERC721.sol";
+import "forge-std/interfaces/IERC721.sol";
 
 error LengthMismatch();
 
 abstract contract Handler {
     function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {
-        ERC721 collection = ERC721(collectionAddress);
+        IERC721 collection = IERC721(collectionAddress);
         collection.safeTransferFrom(from, to, id);
     }
 
