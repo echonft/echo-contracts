@@ -83,7 +83,7 @@ contract ApprovalTest is BaseTest {
 
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
-        emit TradeExecuted("test", account1);
+        emit TradeExecuted(account1, account2, "test");
         echo.executeTrade(v, r, s, trade);
 
         // Assets are now swapped
