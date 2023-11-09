@@ -10,7 +10,7 @@ abstract contract BaseTest is Test {
     // Exclude from coverage report
     function test() public {}
 
-    event TradeExecuted(address indexed owner, address indexed counterparty, string id);
+    event TradeExecuted(string id);
 
     Echo echo;
     // To test internal function as it's impossible to reach the code
