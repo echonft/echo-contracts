@@ -14,7 +14,7 @@ error InvalidAssets();
 error InvalidPayment();
 
 contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
-    event TradeExecuted(string indexed id, address user);
+    event TradeExecuted(string id);
 
     constructor(address owner) Admin(owner) {}
 
@@ -73,6 +73,6 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
         // Add trade to list to avoid replay and duplicates
         trades[trade.id] = true;
 
-        emit TradeExecuted(trade.id, msg.sender);
+        emit TradeExecuted(trade.id);
     }
 }
