@@ -6,7 +6,7 @@ import "solady/src/utils/LibString.sol";
 
 abstract contract BaseERC721 is ERC721 {
     // Exclude from coverage report
-    function test() public {}
+    function test() public virtual {}
 
     // The tokenId of the next token to be minted.
     uint256 internal _currentIndex;
@@ -33,6 +33,9 @@ abstract contract BaseERC721 is ERC721 {
 }
 
 contract Mocked721 is BaseERC721 {
+    // Exclude from coverage report
+    function test() public override {}
+
     using LibString for uint256;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
@@ -44,6 +47,9 @@ contract Mocked721 is BaseERC721 {
 }
 
 contract Mocked721WithSuffix is BaseERC721 {
+    // Exclude from coverage report
+    function test() public override {}
+
     using LibString for uint256;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
