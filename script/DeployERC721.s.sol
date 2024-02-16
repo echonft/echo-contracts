@@ -11,14 +11,14 @@ contract DeployNFT is Script {
     function run() external {
         vm.startBroadcast();
 
-        Mocked721 BAYC = new Mocked721({name: 'BoredApeYachtClub', symbol: 'BAYC'});
-        BAYC.setBaseURI("ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/");
+        Mocked721 SORAS = new Mocked721({name: "Sora's Dreamworld", symbol: 'Sora'});
+        SORAS.setBaseURI("https://sorasdreamworld.io/tokens/");
 
-        Mocked721 MAYC = new Mocked721({name: 'MutantApeYachtClub', symbol: 'MAYC'});
-        MAYC.setBaseURI("https://boredapeyachtclub.com/api/mutants/");
-
-        Mocked721 CK = new Mocked721({name: 'CyberKongz', symbol: 'KONGZ'});
-        CK.setBaseURI("https://kongz.herokuapp.com/api/metadata/");
+        Mocked721WithSuffix CREEPZ = new Mocked721WithSuffix({
+            name: 'Creepz by OVERLORD',
+            symbol: 'CBC'
+        });
+        CREEPZ.setBaseURI("ipfs://QmVRsXpYYp3qALoxjYUfNZAA6A28P86REKkoqadoXM5tLn/");
 
         vm.stopBroadcast();
     }
