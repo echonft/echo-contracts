@@ -24,9 +24,10 @@ contract ExpirationTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(TradeHasExpired.selector);
-        echo.executeTrade(v, r, s, trade);
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 
     function testExpiresBeforeCurrentBlock() public {
@@ -47,8 +48,9 @@ contract ExpirationTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(TradeHasExpired.selector);
-        echo.executeTrade(v, r, s, trade);
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 }

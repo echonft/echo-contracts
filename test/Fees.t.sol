@@ -26,17 +26,13 @@ contract FeesTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        vm.prank(account1);
         // 0 ether
         vm.expectRevert(InvalidPayment.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0 ether);
 
         // Not enough ether
-        vm.prank(account1);
         vm.expectRevert(InvalidPayment.selector);
-        echo.executeTrade{value: 0.004 ether}(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0.004 ether);
     }
 
     function testSucceedsWithFunds() public {
@@ -59,10 +55,8 @@ contract FeesTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
         vm.prank(account1);
-        echo.executeTrade{value: 0.005 ether}(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0.005 ether);
         assertEq(address(echo).balance, 0.005 ether);
         assertEq(account1.balance, 100 ether - 0.005 ether);
     }

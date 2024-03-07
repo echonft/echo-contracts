@@ -23,11 +23,8 @@ contract SignatureTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        uint256 wrongPrivateKey = _generatePrivateKey(testMnemonic, 1);
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, wrongPrivateKey);
-        vm.prank(account1);
         vm.expectRevert(InvalidSignature.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, signerPrivateKey, signerPrivateKey, echo.tradingFee());
     }
 
     function testHashTypedData() public {

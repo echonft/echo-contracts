@@ -22,11 +22,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -51,11 +49,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -79,11 +75,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -108,11 +102,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -137,11 +129,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -166,11 +156,9 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);

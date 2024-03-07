@@ -5,6 +5,7 @@ import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
+// TODO Add test for setSigner
 contract AdminTest is BaseTest {
     function testCannotChangeFeesIfNotOwner() public {
         vm.prank(account1);
@@ -46,7 +47,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(account1);
         vm.expectRevert("UNAUTHORIZED");
@@ -62,7 +63,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         assertEq(address(echo).balance, 0.005 ether);
         vm.prank(owner);
@@ -80,7 +81,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(owner);
         echo.withdraw(account3);
@@ -97,7 +98,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(owner);
         vm.expectRevert(WithdrawFailed.selector);

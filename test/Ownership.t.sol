@@ -23,17 +23,14 @@ contract OwnershipTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         // Counterparty
-        vm.prank(account2);
         vm.expectRevert(InvalidCreator.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account2, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Random account
-        vm.prank(account3);
         vm.expectRevert(InvalidCreator.selector);
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account3, account2PrivateKey, signerPrivateKey, echo.tradingFee());
     }
 
     // Creator is not owner
@@ -53,11 +50,8 @@ contract OwnershipTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
-        vm.prank(account3);
         vm.expectRevert(bytes("WRONG_FROM"));
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account3, account2PrivateKey, signerPrivateKey, echo.tradingFee());
     }
 
     // TODO Should be the same error message as the other?
@@ -77,10 +71,8 @@ contract OwnershipTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectRevert(bytes("WRONG_FROM"));
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
     }
 }

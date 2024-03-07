@@ -23,11 +23,9 @@ contract ApprovalTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account3);
         vm.expectRevert(bytes("NOT_AUTHORIZED"));
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account3, account2PrivateKey, signerPrivateKey, echo.tradingFee());
     }
 
     /// Counterparty has not approved its birds
@@ -47,15 +45,13 @@ contract ApprovalTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
         vm.startPrank(account2);
         birds.setApprovalForAll(address(echo), false);
         vm.stopPrank();
 
-        vm.prank(account1);
         vm.expectRevert(bytes("NOT_AUTHORIZED"));
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
     }
 
     /// Succeeds when both creator and counterparty have approved their assets
@@ -79,12 +75,10 @@ contract ApprovalTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
 
-        vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        echo.executeTrade(v, r, s, trade);
+        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);

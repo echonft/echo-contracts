@@ -12,49 +12,48 @@ abstract contract BaseTest is Test {
 
     event TradeExecuted(string id);
 
-    Echo echo;
+    Echo public echo;
     // To test internal function as it's impossible to reach the code
     // from echo (echo also checks for length)
-    MockedHandler handler;
+    MockedHandler public handler;
 
-    Mocked721 apes;
-    Mocked721 birds;
+    Mocked721 public apes;
+    Mocked721 public birds;
 
-    address constant owner = address(1313);
-    address constant account1 = address(1337);
-    address constant account3 = address(1339);
-    address constant account4 = address(1340);
-    address constant refer = address(1341);
+    address public constant owner = address(1313);
+    address public constant account1 = address(1337);
+    address public constant account3 = address(1339);
+    address public constant account4 = address(1340);
+    address public account2;
+    uint256 public constant account2PrivateKey = 0xA11CE;
+    address public signer;
+    uint256 public constant signerPrivateKey = 0xB0B;
 
     // For signing
     bytes32 internal constant TRADE_TYPEHASH = keccak256(
         "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
 
-    address apeAddress;
-    uint256 ape1Id;
-    uint256 ape2Id;
-    uint256 ape3Id;
-    address birdAddress;
-    uint256 bird1Id;
-    uint256 bird2Id;
-    uint256 bird3Id;
+    address public apeAddress;
+    uint256 public ape1Id;
+    uint256 public ape2Id;
+    uint256 public ape3Id;
+    address public birdAddress;
+    uint256 public bird1Id;
+    uint256 public bird2Id;
+    uint256 public bird3Id;
 
-    address[] creator721Collections;
-    uint256[] creator721Ids;
-    address[] counterparty721Collections;
-    uint256[] counterparty721Ids;
+    address[] public creator721Collections;
+    uint256[] public creator721Ids;
+    address[] public counterparty721Collections;
+    uint256[] public counterparty721Ids;
 
-    uint256 in6hours;
-
-    string constant testMnemonic = "test test test test test test test test test test test junk";
-    address account2;
-    uint256 account2PrivateKey;
+    uint256 public in6hours;
 
     function setUp() public {
-        // Generate account2 from mnemonic to get private key.
-        account2PrivateKey = _generatePrivateKey(testMnemonic, 0);
+        // Generate account2 and signer from private key.
         account2 = vm.addr(account2PrivateKey);
+        signer = vm.addr(signerPrivateKey);
 
         // Fund accounts
         vm.deal(account1, 100 ether);
@@ -62,7 +61,7 @@ abstract contract BaseTest is Test {
         vm.deal(account3, 100 ether);
         vm.deal(account4, 100 ether);
 
-        echo = new Echo({owner: owner});
+        echo = new Echo({owner: owner, signer: signer});
         handler = new MockedHandler();
 
         apes = new Mocked721("Apes", "APE");
@@ -96,10 +95,6 @@ abstract contract BaseTest is Test {
         in6hours = block.timestamp + (60 * 60 * 6);
     }
 
-    function _generatePrivateKey(string memory mnemonic, uint32 index) internal pure returns (uint256 privateKey) {
-        privateKey = vm.deriveKey(mnemonic, index);
-    }
-
     function _signTrade(Trade memory trade, uint256 privateKey) internal view returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -119,7 +114,20 @@ abstract contract BaseTest is Test {
         (v, r, s) = vm.sign(privateKey, digest);
     }
 
-    function _executeTrade(string memory id, address creator, address counter, uint256 fees) internal {
+    function _executeTrade(
+        Trade memory trade,
+        address creator,
+        uint256 counterpartyPrivateKey,
+        uint256 _signerPrivateKey,
+        uint256 fees
+    ) public {
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, counterpartyPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, _signerPrivateKey);
+        vm.prank(creator);
+        echo.executeTrade{value: fees}(v, r, s, vSigner, rSigner, sSigner, trade);
+    }
+
+    function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {
         Trade memory trade = Trade({
             id: id,
             creator: creator,
@@ -131,8 +139,8 @@ abstract contract BaseTest is Test {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(creator);
-        echo.executeTrade{value: fees}(v, r, s, trade);
+        echo.executeTrade{value: fees}(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 }
