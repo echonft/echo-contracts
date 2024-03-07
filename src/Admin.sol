@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "solmate/auth/Owned.sol";
 
 error Paused();
+error InvalidAddress();
 
 /// @dev Handles ownable and pausable of contract.
 /// Also manages the signer address to validate trades
@@ -20,6 +21,7 @@ abstract contract Admin is Owned {
     }
 
     function setSigner(address _signer) external onlyOwner {
+        if (_signer == address(0)) revert InvalidAddress();
         signer = _signer;
     }
 
