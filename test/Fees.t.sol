@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
@@ -26,13 +26,18 @@ contract FeesTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        // 0 ether
-        vm.expectRevert(InvalidPayment.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0 ether);
 
-        // Not enough ether
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectRevert(InvalidPayment.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0.004 ether);
+        // 0 ether
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidPayment.selector);
+        // Not enough ether
+        echo.executeTrade{value: 0.004 ether}(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 
     function testSucceedsWithFunds() public {
@@ -55,8 +60,11 @@ contract FeesTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
+
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(account1);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, 0.005 ether);
+        echo.executeTrade{value: 0.005 ether}(v, r, s, vSigner, rSigner, sSigner, trade);
         assertEq(address(echo).balance, 0.005 ether);
         assertEq(account1.balance, 100 ether - 0.005 ether);
     }

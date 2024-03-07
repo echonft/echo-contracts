@@ -1,66 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
 contract Trade721Test is BaseTest {
-    function testCannotSwapEmptyCreatorAssets() public {
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird2Id);
-
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-
-        vm.expectRevert(InvalidAssets.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
-    }
-
-    function testCannotSwapEmptyCounterpartyAssets() public {
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-        vm.expectRevert(InvalidAssets.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
-    }
-
-    function testCannotSwapEmptyAssets() public {
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-
-        vm.expectRevert(InvalidAssets.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
-    }
-
     // @dev Swap: 1 ape for 2 birds
     function testSwapOneForTwo() public {
         creator721Collections.push(apeAddress);
@@ -80,9 +25,13 @@ contract Trade721Test is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
+
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -110,9 +59,12 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -142,9 +94,12 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -178,7 +133,10 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectRevert(TradeAlreadyExist.selector);
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 }

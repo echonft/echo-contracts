@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
-// TODO Add test for setSigner
 contract AdminTest is BaseTest {
     function testCannotChangeFeesIfNotOwner() public {
         vm.prank(account1);
@@ -105,5 +104,17 @@ contract AdminTest is BaseTest {
         echo.withdraw(address(echo));
         assertEq(account3.balance, 100 ether);
         assertEq(address(echo).balance, 0.005 ether);
+    }
+
+    function testCannotChangeSignerIfNotOwner() public {
+        vm.prank(account1);
+        vm.expectRevert("UNAUTHORIZED");
+        echo.setSigner(address(0));
+    }
+
+    function testCanChangeSignerIfOwner() public {
+        vm.prank(owner);
+        echo.setSigner(address(0));
+        assertEq(echo.signer(), address(0));
     }
 }

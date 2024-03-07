@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "./mock/Mocked721.t.sol";
 import "./mock/MockHandler.t.sol";
@@ -114,19 +114,8 @@ abstract contract BaseTest is Test {
         (v, r, s) = vm.sign(privateKey, digest);
     }
 
-    function _executeTrade(
-        Trade memory trade,
-        address creator,
-        uint256 counterpartyPrivateKey,
-        uint256 _signerPrivateKey,
-        uint256 fees
-    ) public {
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, counterpartyPrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, _signerPrivateKey);
-        vm.prank(creator);
-        echo.executeTrade{value: fees}(v, r, s, vSigner, rSigner, sSigner, trade);
-    }
-
+    // @dev Method to execute a mock trade with predefined values
+    // @dev Do not use this method if you expect a revert as the way Foundry is built, it won't catch the revert
     function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {
         Trade memory trade = Trade({
             id: id,

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import "../src/Echo.sol";
@@ -10,10 +10,9 @@ contract DeployEcho is Script {
 
     function run() external {
         vm.startBroadcast();
-        // TODO Make sure the proper signer is defined
         new Echo({
             owner: address(0x213bE2f484Ab480db4f18b0Fe4C38e1C25877f09),
-            signer: address(0x0)
+            signer: address(0x213bE2f484Ab480db4f18b0Fe4C38e1C25877f09)
         });
 
         vm.stopBroadcast();

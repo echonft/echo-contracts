@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.24;
 
 import "./BaseTest.t.sol";
 import "./mock/Mocked721.t.sol";
@@ -24,8 +24,11 @@ contract ApprovalTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account3);
         vm.expectRevert(bytes("NOT_AUTHORIZED"));
-        _executeTrade(trade, account3, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 
     /// Counterparty has not approved its birds
@@ -50,8 +53,11 @@ contract ApprovalTest is BaseTest {
         birds.setApprovalForAll(address(echo), false);
         vm.stopPrank();
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectRevert(bytes("NOT_AUTHORIZED"));
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 
     /// Succeeds when both creator and counterparty have approved their assets
@@ -76,9 +82,12 @@ contract ApprovalTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        _executeTrade(trade, account1, account2PrivateKey, signerPrivateKey, echo.tradingFee());
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
