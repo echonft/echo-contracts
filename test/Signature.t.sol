@@ -6,8 +6,7 @@ import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
 contract SignatureTest is BaseTest {
-    // Wrong signer
-    function testInvalidSignature() public {
+    function testInvalidCounterpartySignature() public {
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape3Id);
         counterparty721Collections.push(birdAddress);
@@ -23,11 +22,36 @@ contract SignatureTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        uint256 wrongPrivateKey = _generatePrivateKey(testMnemonic, 1);
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, wrongPrivateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidSignature.selector);
-        echo.executeTrade(v, r, s, trade);
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+    }
+
+    function testInvalidSignerSignature() public {
+        creator721Collections.push(apeAddress);
+        creator721Ids.push(ape3Id);
+        counterparty721Collections.push(birdAddress);
+        counterparty721Ids.push(bird3Id);
+
+        Trade memory trade = Trade({
+            id: "test",
+            creator: account1,
+            counterparty: account2,
+            expiresAt: in6hours,
+            creatorCollections: creator721Collections,
+            creatorIds: creator721Ids,
+            counterpartyCollections: counterparty721Collections,
+            counterpartyIds: counterparty721Ids
+        });
+
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, account2PrivateKey);
+        vm.prank(account1);
+        vm.expectRevert(InvalidSigner.selector);
+        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
     }
 
     function testHashTypedData() public {

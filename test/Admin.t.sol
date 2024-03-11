@@ -46,7 +46,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(account1);
         vm.expectRevert("UNAUTHORIZED");
@@ -62,7 +62,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         assertEq(address(echo).balance, 0.005 ether);
         vm.prank(owner);
@@ -80,7 +80,7 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(owner);
         echo.withdraw(account3);
@@ -97,12 +97,30 @@ contract AdminTest is BaseTest {
         creator721Ids.push(ape1Id);
         counterparty721Collections.push(birdAddress);
         counterparty721Ids.push(bird1Id);
-        _executeTrade("test", account1, account2, 0.005 ether);
+        _executeMockTrade("test", account1, account2, 0.005 ether);
 
         vm.prank(owner);
         vm.expectRevert(WithdrawFailed.selector);
         echo.withdraw(address(echo));
         assertEq(account3.balance, 100 ether);
         assertEq(address(echo).balance, 0.005 ether);
+    }
+
+    function testCannotChangeSignerIfNotOwner() public {
+        vm.prank(account1);
+        vm.expectRevert("UNAUTHORIZED");
+        echo.setSigner(address(0xB0B));
+    }
+
+    function testCannotChangeSignerToAddress0() public {
+        vm.prank(owner);
+        vm.expectRevert(InvalidAddress.selector);
+        echo.setSigner(address(0));
+    }
+
+    function testCanChangeSignerIfOwner() public {
+        vm.prank(owner);
+        echo.setSigner(address(0xB0B));
+        assertEq(echo.signer(), address(0xB0B));
     }
 }

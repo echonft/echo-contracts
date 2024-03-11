@@ -7,6 +7,7 @@ import "solady/src/utils/ECDSA.sol";
 import "solady/src/utils/EIP712.sol";
 
 error InvalidSignature();
+error InvalidSigner();
 
 struct Trade {
     string id;
@@ -39,7 +40,7 @@ abstract contract Signer is EIP712 {
         return _domainSeparator();
     }
 
-    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade memory trade) internal view {
+    function _retrieveSigner(uint8 v, bytes32 r, bytes32 s, Trade calldata trade) internal view returns (address) {
         bytes32 structHash = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
@@ -54,8 +55,14 @@ abstract contract Signer is EIP712 {
             )
         );
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
-        address signer = ECDSA.recover(hash, v, r, s);
+        return ECDSA.recover(hash, v, r, s);
+    }
 
-        if (signer != trade.counterparty) revert InvalidSignature();
+    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade calldata trade) internal view {
+        if (_retrieveSigner(v, r, s, trade) != trade.counterparty) revert InvalidSignature();
+    }
+
+    function _validateSigner(uint8 v, bytes32 r, bytes32 s, address signer, Trade calldata trade) internal view {
+        if (_retrieveSigner(v, r, s, trade) != signer) revert InvalidSigner();
     }
 }
