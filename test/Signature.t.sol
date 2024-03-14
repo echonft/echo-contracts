@@ -22,12 +22,12 @@ contract SignatureTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, signerPrivateKey, signerPrivateKey);
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, signerPrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidSignature.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     function testInvalidSignerSignature() public {
@@ -46,15 +46,15 @@ contract SignatureTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, account2PrivateKey);
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, account2PrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidSigner.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
-    function testHashTypedData() public {
+    function testTradeHashTypedData() public {
         creator721Collections.push(apeAddress);
         creator721Ids.push(ape3Id);
         counterparty721Collections.push(birdAddress);
@@ -91,6 +91,21 @@ contract SignatureTest is BaseTest {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
         address recoveredAddress = ecrecover(expectedDigest, v, r, s);
         assertEq(recoveredAddress, trade.counterparty);
+    }
+
+    function testSignatureHashTypedData() public {
+        Signature memory signature = Signature({
+            signature: hex"8688e590483917863a35ef230c0f839be8418aa4ee765228eddfcea7fe2652815db01c2c84b0ec746e1b74d97475c599b3d3419fa7181b4e01de62c02b721aea1b"
+        });
+
+        bytes32 structHash = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.signature));
+        bytes32 expectedDigest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), structHash));
+        // Check hash struct
+        assertEq(echo.hashTypedData(structHash), expectedDigest);
+
+        (uint8 v, bytes32 r, bytes32 s) = _signSignature(signature, account2PrivateKey);
+        address recoveredAddress = ecrecover(expectedDigest, v, r, s);
+        assertEq(recoveredAddress, account2);
     }
 
     function testDomainSeparator() public {

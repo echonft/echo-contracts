@@ -33,6 +33,7 @@ abstract contract BaseTest is Test {
     bytes32 internal constant TRADE_TYPEHASH = keccak256(
         "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
+    bytes32 internal constant SIGNATURE_TYPEHASH = keccak256("Signature(bytes signature)");
 
     address public apeAddress;
     uint256 public ape1Id;
@@ -95,6 +96,7 @@ abstract contract BaseTest is Test {
         in6hours = block.timestamp + (60 * 60 * 6);
     }
 
+    // @dev Sign the trade with private key
     function _signTrade(Trade memory trade, uint256 privateKey) internal view returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -114,6 +116,29 @@ abstract contract BaseTest is Test {
         (v, r, s) = vm.sign(privateKey, digest);
     }
 
+    // @dev Sign the signature with the private key. This is simulating the backend signing
+    function _signSignature(Signature memory signature, uint256 privateKey)
+        internal
+        view
+        returns (uint8 v, bytes32 r, bytes32 s)
+    {
+        bytes32 hashStruct = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.signature));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), hashStruct));
+        (v, r, s) = vm.sign(privateKey, digest);
+    }
+
+    // @dev Util function to generate the backend signature of the trade, returns all the data to execute the trade
+    function _prepareSignature(Trade memory trade, uint256 counterpartyPrivateKey, uint256 _signerPrivateKey)
+        internal
+        view
+        returns (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature)
+    {
+        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, counterpartyPrivateKey);
+        bytes memory _signature = abi.encodePacked(r, s, v);
+        signature = Signature({signature: _signature});
+        (vSigner, rSigner, sSigner) = _signSignature(signature, _signerPrivateKey);
+    }
+
     // @dev Method to execute a mock trade with predefined values
     // @dev Do not use this method if you expect a revert as the way Foundry is built, it won't catch the revert
     function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {
@@ -128,8 +153,10 @@ abstract contract BaseTest is Test {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        bytes memory _signature = abi.encodePacked(r, s, v);
+        Signature memory signature = Signature({signature: _signature});
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signSignature(signature, signerPrivateKey);
         vm.prank(creator);
-        echo.executeTrade{value: fees}(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade{value: fees}(vSigner, rSigner, sSigner, signature, trade);
     }
 }
