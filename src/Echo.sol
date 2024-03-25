@@ -50,7 +50,7 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
         }
 
         _validateSignature(v, r, s, signatureData, signer);
-        _validateTrade(signatureData.signature, trade);
+        _validateTrade(signatureData, trade);
 
         // Transfer creator's assets
         _transferTokens({

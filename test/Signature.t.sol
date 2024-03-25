@@ -94,16 +94,13 @@ contract SignatureTest is BaseTest {
     }
 
     function testSignatureHashTypedData() public {
-        Signature memory signature = Signature({
-            signature: hex"8688e590483917863a35ef230c0f839be8418aa4ee765228eddfcea7fe2652815db01c2c84b0ec746e1b74d97475c599b3d3419fa7181b4e01de62c02b721aea1b"
-        });
-
-        bytes32 structHash = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.signature));
+        bytes32 structHash =
+            keccak256(abi.encode(SIGNATURE_TYPEHASH, mockSignature.v, mockSignature.r, mockSignature.s));
         bytes32 expectedDigest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), structHash));
         // Check hash struct
         assertEq(echo.hashTypedData(structHash), expectedDigest);
 
-        (uint8 v, bytes32 r, bytes32 s) = _signSignature(signature, account2PrivateKey);
+        (uint8 v, bytes32 r, bytes32 s) = _signSignature(mockSignature, account2PrivateKey);
         address recoveredAddress = ecrecover(expectedDigest, v, r, s);
         assertEq(recoveredAddress, account2);
     }

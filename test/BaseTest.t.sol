@@ -3,10 +3,11 @@ pragma solidity ^0.8.18;
 
 import "./mock/Mocked721.t.sol";
 import "./mock/MockHandler.t.sol";
+import "./utils/Constants.sol";
 import "forge-std/Test.sol";
 import "src/Echo.sol";
 
-abstract contract BaseTest is Test {
+abstract contract BaseTest is Test, Constants {
     // Exclude from coverage report
     function test() public {}
 
@@ -28,12 +29,6 @@ abstract contract BaseTest is Test {
     uint256 public constant account2PrivateKey = 0xA11CE;
     address public signer;
     uint256 public constant signerPrivateKey = 0xB0B;
-
-    // For signing
-    bytes32 internal constant TRADE_TYPEHASH = keccak256(
-        "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
-    );
-    bytes32 internal constant SIGNATURE_TYPEHASH = keccak256("Signature(bytes signature)");
 
     address public apeAddress;
     uint256 public ape1Id;
@@ -122,7 +117,7 @@ abstract contract BaseTest is Test {
         view
         returns (uint8 v, bytes32 r, bytes32 s)
     {
-        bytes32 hashStruct = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.signature));
+        bytes32 hashStruct = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.v, signature.r, signature.s));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), hashStruct));
         (v, r, s) = vm.sign(privateKey, digest);
     }
@@ -134,8 +129,7 @@ abstract contract BaseTest is Test {
         returns (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature)
     {
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, counterpartyPrivateKey);
-        bytes memory _signature = abi.encodePacked(r, s, v);
-        signature = Signature({signature: _signature});
+        signature = Signature({v: v, r: r, s: s});
         (vSigner, rSigner, sSigner) = _signSignature(signature, _signerPrivateKey);
     }
 
@@ -153,8 +147,7 @@ abstract contract BaseTest is Test {
             counterpartyIds: counterparty721Ids
         });
         (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        bytes memory _signature = abi.encodePacked(r, s, v);
-        Signature memory signature = Signature({signature: _signature});
+        Signature memory signature = Signature({v: v, r: r, s: s});
         (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signSignature(signature, signerPrivateKey);
         vm.prank(creator);
         echo.executeTrade{value: fees}(vSigner, rSigner, sSigner, signature, trade);

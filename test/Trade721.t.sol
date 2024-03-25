@@ -28,6 +28,7 @@ contract Trade721Test is BaseTest {
 
         (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
             _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
+
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");

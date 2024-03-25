@@ -11,15 +11,16 @@ creepz=0xB9FBf3cDf5B344a9e09528FEe853e376d57eE7cA
 nftsToSend=2
 
 # Addresses
-receiver=0xE2479c6935cd881C550D69D75d13113833a91B2E
+receiver=0xD1098fe3019646C85337528323d8B63458C2De30
 sender=0x213bE2f484Ab480db4f18b0Fe4C38e1C25877f09
 
 # IDs
-baycStartingId=104
-maycStartingId=89
-kongzStartingId=79
-soraStartingId=59
-creepzStartingId=59
+baycStartingId=106
+kongzStartingId=81
+maycStartingId=91
+kongzStartingId=81
+soraStartingId=61
+creepzStartingId=61
 
 # Distribute BAYC
 for((id=baycStartingId;id<baycStartingId + nftsToSend; id++))
