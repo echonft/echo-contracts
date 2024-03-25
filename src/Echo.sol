@@ -20,17 +20,14 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
 
     /// @dev Only executed trades are on chain to avoid replay attacks
     /// Trades are mapped by id
-    mapping(string => bool) trades;
+    mapping(string => bool) internal trades;
 
-    function executeTrade(
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        uint8 vSigner,
-        bytes32 rSigner,
-        bytes32 sSigner,
-        Trade calldata trade
-    ) external payable nonReentrant notPaused {
+    function executeTrade(uint8 v, bytes32 r, bytes32 s, Signature calldata signatureData, Trade calldata trade)
+        external
+        payable
+        nonReentrant
+        notPaused
+    {
         if (trades[trade.id]) {
             revert TradeAlreadyExist();
         }
@@ -52,8 +49,8 @@ contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
             revert InvalidPayment();
         }
 
-        _validateSigner(vSigner, rSigner, sSigner, signer, trade);
-        _validateSignature(v, r, s, trade);
+        _validateSignature(v, r, s, signatureData, signer);
+        _validateTrade(signatureData, trade);
 
         // Transfer creator's assets
         _transferTokens({

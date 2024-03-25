@@ -10,11 +10,11 @@ contract DeployTestEcho is Script {
 
     function run() external {
         vm.startBroadcast();
+
         new TestEcho({
             owner: address(0x213bE2f484Ab480db4f18b0Fe4C38e1C25877f09),
             signer: address(0x213bE2f484Ab480db4f18b0Fe4C38e1C25877f09)
         });
-
         vm.stopBroadcast();
     }
 }

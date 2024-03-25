@@ -24,17 +24,17 @@ contract OwnershipTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         // Counterparty
         vm.prank(account2);
         vm.expectRevert(InvalidCreator.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Random account
         vm.prank(account3);
         vm.expectRevert(InvalidCreator.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     // Creator is not owner
@@ -55,11 +55,11 @@ contract OwnershipTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account3);
         vm.expectRevert(bytes("WRONG_FROM"));
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     // TODO Should be the same error message as the other?
@@ -80,10 +80,10 @@ contract OwnershipTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(bytes("WRONG_FROM"));
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 }

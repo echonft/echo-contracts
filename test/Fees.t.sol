@@ -27,17 +27,17 @@ contract FeesTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidPayment.selector);
         // 0 ether
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         vm.prank(account1);
         vm.expectRevert(InvalidPayment.selector);
         // Not enough ether
-        echo.executeTrade{value: 0.004 ether}(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade{value: 0.004 ether}(vSigner, rSigner, sSigner, signature, trade);
     }
 
     function testSucceedsWithFunds() public {
@@ -61,10 +61,10 @@ contract FeesTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
-        echo.executeTrade{value: 0.005 ether}(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade{value: 0.005 ether}(vSigner, rSigner, sSigner, signature, trade);
         assertEq(address(echo).balance, 0.005 ether);
         assertEq(account1.balance, 100 ether - 0.005 ether);
     }

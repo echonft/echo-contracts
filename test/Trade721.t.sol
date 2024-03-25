@@ -26,12 +26,13 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
+
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -59,12 +60,12 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -94,12 +95,12 @@ contract Trade721Test is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectEmit(true, true, true, true);
         emit TradeExecuted("test");
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are now swapped
         assertEq(apes.ownerOf(1), account2);
@@ -132,11 +133,10 @@ contract Trade721Test is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(TradeAlreadyExist.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 }

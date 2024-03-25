@@ -20,12 +20,21 @@ struct Trade {
     uint256[] counterpartyIds;
 }
 
+struct Signature {
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+}
+
 abstract contract Signer is EIP712 {
     using ECDSA for bytes32;
+    using ECDSA for bytes;
 
-    bytes32 private constant TRADE_TYPEHASH = keccak256(
+    bytes32 private immutable TRADE_TYPEHASH = keccak256(
         "Trade(string id,address creator,address counterparty,uint256 expiresAt,address[] creatorCollections,uint256[] creatorIds,address[] counterpartyCollections,uint256[] counterpartyIds)"
     );
+
+    bytes32 private immutable SIGNATURE_TYPEHASH = keccak256("Signature(uint8 v,bytes32 r,bytes32 s)");
 
     function _domainNameAndVersion() internal pure override returns (string memory name, string memory version) {
         name = "Echo";
@@ -40,7 +49,7 @@ abstract contract Signer is EIP712 {
         return _domainSeparator();
     }
 
-    function _retrieveSigner(uint8 v, bytes32 r, bytes32 s, Trade calldata trade) internal view returns (address) {
+    function _validateTrade(Signature calldata signatureData, Trade calldata trade) internal view {
         bytes32 structHash = keccak256(
             abi.encode(
                 TRADE_TYPEHASH,
@@ -55,14 +64,18 @@ abstract contract Signer is EIP712 {
             )
         );
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
-        return ECDSA.recover(hash, v, r, s);
+        if (ECDSA.recover(hash, signatureData.v, signatureData.r, signatureData.s) != trade.counterparty) {
+            revert InvalidSignature();
+        }
     }
 
-    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Trade calldata trade) internal view {
-        if (_retrieveSigner(v, r, s, trade) != trade.counterparty) revert InvalidSignature();
-    }
-
-    function _validateSigner(uint8 v, bytes32 r, bytes32 s, address signer, Trade calldata trade) internal view {
-        if (_retrieveSigner(v, r, s, trade) != signer) revert InvalidSigner();
+    function _validateSignature(uint8 v, bytes32 r, bytes32 s, Signature calldata signatureData, address signer)
+        internal
+        view
+    {
+        bytes32 structHash =
+            keccak256(abi.encode(SIGNATURE_TYPEHASH, signatureData.v, signatureData.r, signatureData.s));
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", this.domainSeparator(), structHash));
+        if (ECDSA.recover(hash, v, r, s) != signer) revert InvalidSigner();
     }
 }
