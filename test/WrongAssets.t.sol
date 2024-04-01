@@ -22,11 +22,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     function testCannotSwapEmptyCounterpartyAssets() public {
@@ -43,11 +43,12 @@ contract WrongAssetsTest is BaseTest {
             counterpartyCollections: counterparty721Collections,
             counterpartyIds: counterparty721Ids
         });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     function testCannotSwapEmptyAssets() public {
@@ -62,11 +63,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(InvalidAssets.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
     }
 
     function testCannotTradeLongerCreatorIds() public {
@@ -87,11 +88,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(LengthMismatch.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -117,11 +118,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(LengthMismatch.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -146,11 +147,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(LengthMismatch.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -176,11 +177,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert(LengthMismatch.selector);
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -206,11 +207,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
@@ -236,11 +237,11 @@ contract WrongAssetsTest is BaseTest {
             counterpartyIds: counterparty721Ids
         });
 
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signTrade(trade, signerPrivateKey);
+        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
+            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
         vm.expectRevert("WRONG_FROM");
-        echo.executeTrade(v, r, s, vSigner, rSigner, sSigner, trade);
+        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
 
         // Assets are not swapped
         assertEq(apes.ownerOf(1), account1);
