@@ -27,6 +27,7 @@ abstract contract Message {
             parsedMessage.evmSender,
             parsedMessage.evmReceiver,
             parsedMessage.evmTokenAddress,
+            parsedMessage.evmTokenId,
             parsedMessage.solSender,
             parsedMessage.solReceiver,
             parsedMessage.solSenderTokenMint

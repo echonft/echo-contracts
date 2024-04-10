@@ -39,17 +39,6 @@ contract TestBridge is Test {
      * contracts before each test is executed.
      */
     function setUp() public {
-        // Fund accounts
-        vm.deal(sender, 100 ether);
-        vm.deal(receiver, 100 ether);
-
-        apes = new Mocked721("Apes", "APE");
-        birds = new Mocked721("Birds", "BIRD");
-
-        apes.safeMint(sender, 1);
-
-        birds.safeMint(receiver, 1);
-
         // verify that we're using the correct fork (AVAX mainnet in this case)
         require(block.chainid == vm.envUint("TESTING_AVAX_FORK_CHAINID"), "wrong evm");
 
@@ -78,6 +67,17 @@ contract TestBridge is Test {
     }
 
     function testAcceptTrade() public {
+        // Fund accounts
+        vm.deal(sender, 100 ether);
+        vm.deal(receiver, 100 ether);
+
+        apes = new Mocked721("Apes", "APE");
+        birds = new Mocked721("Birds", "BIRD");
+
+        apes.safeMint(sender, 1);
+
+        birds.safeMint(receiver, 1);
+
         // start listening to events
         vm.recordLogs();
 
@@ -115,6 +115,7 @@ contract TestBridge is Test {
         vm.stopPrank();
 
         vm.startPrank(receiver);
+        assertEq(birds.ownerOf(1), receiver);
         echoSource.acceptOffer(
             "test",
             Offer({
