@@ -25,13 +25,13 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
     {}
 
     // @dev This function assumes that the offer was created on another chain.
-    function acceptOffer(string calldata offerId, Offer calldata offer, bytes calldata encodedMessage)
+    function acceptOffer(string calldata offerId, Offer calldata offer, bytes memory encodedMessage)
         external
         payable
         nonReentrant
         notPaused
     {
-        if (_offers[offerId].sender == address(0)) {
+        if (_offers[offerId].sender != address(0)) {
             revert OfferAlreadyExist();
         }
         // @dev

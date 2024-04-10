@@ -37,12 +37,16 @@ abstract contract WormholeState is Owned {
         return IWormhole(_state.wormhole);
     }
 
-    function _setEmitter(uint16 chainId, bytes32 emitter) internal {
-        _state.registeredEmitters[chainId] = emitter;
-    }
+    //    function _setEmitter(uint16 chainId, bytes32 emitter) internal {
+    //        _state.registeredEmitters[chainId] = emitter;
+    //    }
 
     function _consumeMessage(bytes32 hash) internal {
         _state.consumedMessages[hash] = true;
+    }
+
+    function chainId() public view returns (uint16) {
+        return _state.chainId;
     }
 
     /**
@@ -62,7 +66,7 @@ abstract contract WormholeState is Owned {
             revert InvalidEmitterAddress();
         }
 
-        _setEmitter(emitterChainId, emitterAddress);
+        _state.registeredEmitters[emitterChainId] = emitterAddress;
     }
 
     function _verifyEmitter(IWormhole.VM memory vm) internal view returns (bool) {

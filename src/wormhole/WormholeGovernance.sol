@@ -32,7 +32,7 @@ abstract contract WormholeGovernance is Owned, Message, WormholeState {
      * @param message EchoMessageWithoutPayload to send
      * @return messageSequence Wormhole message sequence for this contract
      */
-    function _sendMessage(EchoMessageWithoutPayload memory message) internal returns (uint64 messageSequence) {
+    function _sendMessage(EchoMessageWithoutPayload memory message) public payable returns (uint64 messageSequence) {
         IWormhole wormhole = wormholeContract();
         uint256 wormholeFee = wormhole.messageFee();
 
@@ -76,7 +76,7 @@ abstract contract WormholeGovernance is Owned, Message, WormholeState {
      * @param encodedMessage verified Wormhole message containing arbitrary
      * @return parsedMessage EchoMessage The parsed message from Wormhole
      */
-    function _receiveMessage(bytes calldata encodedMessage) internal returns (EchoMessage memory parsedMessage) {
+    function _receiveMessage(bytes memory encodedMessage) public returns (EchoMessage memory parsedMessage) {
         // call the Wormhole core contract to parse and verify the encodedMessage
         (IWormhole.VM memory wormholeMessage, bool valid, string memory reason) =
             wormholeContract().parseAndVerifyVM(encodedMessage);

@@ -12,6 +12,7 @@
     "pretty": "forge fmt",
     "build": "forge build",
     "test": "forge test -vvv",
+    "test:bridge": "forge test --fork-url https://api.avax.network/ext/bc/C/rpc -vvv",
     "test:gas-report": "forge test --gas-report",
     "snapshot": "forge snapshot; cat .gas-snapshot",
     "coverage": "forge coverage --report lcov",
