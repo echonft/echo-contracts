@@ -7,19 +7,29 @@ error Paused();
 error InvalidAddress();
 
 /// @dev Handles ownable and pausable of contract.
-abstract contract Admin is Owned {
+/// Also manages the signer address to validate trades
+abstract contract AdminSigner is Owned {
     bool public paused;
+    address public signer;
 
-    constructor(address owner) Owned(owner) {}
+    constructor(address owner, address _signer) Owned(owner) {
+        signer = _signer;
+    }
 
     function setPaused(bool _paused) external onlyOwner {
         paused = _paused;
+    }
+
+    function setSigner(address _signer) external onlyOwner {
+        if (_signer == address(0)) revert InvalidAddress();
+        signer = _signer;
     }
 
     modifier notPaused() {
         if (paused) {
             revert Paused();
         }
+
         _;
     }
 }

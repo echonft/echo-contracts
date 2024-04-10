@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./Admin.sol";
 import "solmate/auth/Owned.sol";
 
 error WithdrawFailed();
 
-abstract contract Banker is Owned, Admin {
+abstract contract Banker is Owned {
     uint256 public tradingFee = 0 ether;
 
     /// Withdraw all funds available

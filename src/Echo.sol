@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./Admin.sol";
-import "./Banker.sol";
-import "./Handler.sol";
-import "./Signer.sol";
+import "contracts/AdminSigner.sol";
+import "contracts/Banker.sol";
+import "contracts/Handler.sol";
+import "contracts/Signer.sol";
 import "solmate/utils/ReentrancyGuard.sol";
 
 error TradeAlreadyExist();
@@ -13,10 +13,10 @@ error InvalidCreator();
 error InvalidAssets();
 error InvalidPayment();
 
-contract Echo is ReentrancyGuard, Admin, Handler, Banker, Signer {
+contract Echo is ReentrancyGuard, AdminSigner, Handler, Banker, Signer {
     event TradeExecuted(string id);
 
-    constructor(address owner, address signer) Admin(owner, signer) {}
+    constructor(address owner, address signer) AdminSigner(owner, signer) {}
 
     /// @dev Only executed trades are on chain to avoid replay attacks
     /// Trades are mapped by id
