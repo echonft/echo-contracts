@@ -3,7 +3,6 @@ pragma solidity ^0.8.18;
 
 import "contracts/Admin.sol";
 import "contracts/Banker.sol";
-import "contracts/Handler.sol";
 import "contracts/MessageValidator.sol";
 import "contracts/escrow/Escrow.sol";
 import "contracts/wormhole/WormholeGovernance.sol";
@@ -24,6 +23,13 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         WormholeGovernance(wormhole, chainId, wormholeFinality)
     {}
 
+    function createOffer(Offer calldata offer) external payable nonReentrant notPaused {
+        // @dev Cannot accept an offer if not the receiver
+        if (offer.sender.ethAddress != msg.sender) {
+            revert InvalidCounterparty();
+        }
+    }
+
     // @dev This function assumes that the offer was created on another chain.
     function acceptOffer(string calldata offerId, Offer calldata offer, bytes memory encodedMessage)
         external
@@ -34,7 +40,7 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         if (_offers[offerId].sender != address(0)) {
             revert OfferAlreadyExist();
         }
-        // @dev
+        // @dev Cannot accept an offer if not the receiver
         if (offer.receiver != msg.sender) {
             revert InvalidCounterparty();
         }
@@ -48,7 +54,6 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         }
 
         // Validate that the offer was created on the other chain
-        // @dev This function will revert if not
         EchoMessage memory message = _receiveMessage(encodedMessage);
         _validateMessage(message, offer);
 
@@ -113,5 +118,10 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         //        // Add trade to list to avoid replay and duplicates
         //        trades[trade.id] = true;
         //        emit TradeExecuted(trade.id);
+    }
+
+    // @dev Wormhole function to receive messages and update trades
+    function receiveMessage(bytes memory encodedMessage) public returns (EchoMessage memory parsedMessage) {
+        parsedMessage = _receiveMessage(encodedMessage);
     }
 }

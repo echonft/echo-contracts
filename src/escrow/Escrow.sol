@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/escrow/EscrowData.sol";
 import "contracts/escrow/EscrowHandler.sol";
-import "contracts/escrow/EscrowState.sol";
+import "contracts/types/OfferItems.sol";
 
-abstract contract Escrow is EscrowState, EscrowHandler {
-    function _depositForReceiver(Offer calldata offer) internal {
-        _transferERC721(offer.receiver721Asset.collection, offer.receiver721Asset.id, offer.receiver, address(this));
+abstract contract Escrow is EscrowHandler {
+    function _deposit(OfferItems calldata offerItems, address from) internal {
+        _transferOfferItems(offerItems, from, address(this));
+    }
+
+    function _withdraw(OfferItems calldata offerItems, address to) internal {
+        _transferOfferItems(offerItems, address(this), to);
     }
 }

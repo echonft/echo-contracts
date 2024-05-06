@@ -32,16 +32,11 @@ abstract contract WormholeGovernance is Owned, Message, WormholeState {
      * @param message EchoMessageWithoutPayload to send
      * @return messageSequence Wormhole message sequence for this contract
      */
-    function _sendMessage(EchoMessageWithoutPayload memory message) public payable returns (uint64 messageSequence) {
-        IWormhole wormhole = wormholeContract();
-        uint256 wormholeFee = wormhole.messageFee();
-
-        // TODO Add checks on the message?
-
-        if (msg.value != wormholeFee) {
-            revert NotEnoughWormholeFees();
-        }
-
+    function _sendMessage(EchoMessageWithoutPayload memory message)
+        internal
+        hasEnoughWormholeFees
+        returns (uint64 messageSequence)
+    {
         EchoMessage memory parsedMessage = EchoMessage({
             payloadID: uint8(1),
             id: message.id,
@@ -76,7 +71,7 @@ abstract contract WormholeGovernance is Owned, Message, WormholeState {
      * @param encodedMessage verified Wormhole message containing arbitrary
      * @return parsedMessage EchoMessage The parsed message from Wormhole
      */
-    function _receiveMessage(bytes memory encodedMessage) public returns (EchoMessage memory parsedMessage) {
+    function receiveMessage(bytes memory encodedMessage) internal returns (EchoMessage memory parsedMessage) {
         // call the Wormhole core contract to parse and verify the encodedMessage
         (IWormhole.VM memory wormholeMessage, bool valid, string memory reason) =
             wormholeContract().parseAndVerifyVM(encodedMessage);
@@ -96,5 +91,15 @@ abstract contract WormholeGovernance is Owned, Message, WormholeState {
             revert MessageAlreadyConsumed();
         }
         _consumeMessage(wormholeMessage.hash);
+    }
+
+    modifier hasEnoughWormholeFees() {
+        IWormhole wormhole = wormholeContract();
+        uint256 wormholeFee = wormhole.messageFee();
+
+        if (msg.value != wormholeFee) {
+            revert NotEnoughWormholeFees();
+        }
+        _;
     }
 }

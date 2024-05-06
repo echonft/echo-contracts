@@ -29,23 +29,15 @@ struct State {
 abstract contract WormholeState is Owned {
     State internal _state;
 
-    function isMessageConsumed(bytes32 hash) public view returns (bool) {
+    function isMessageConsumed(bytes32 hash) external view returns (bool) {
         return _state.consumedMessages[hash];
     }
 
-    function wormholeContract() public view returns (IWormhole) {
+    function wormholeContract() external view returns (IWormhole) {
         return IWormhole(_state.wormhole);
     }
 
-    //    function _setEmitter(uint16 chainId, bytes32 emitter) internal {
-    //        _state.registeredEmitters[chainId] = emitter;
-    //    }
-
-    function _consumeMessage(bytes32 hash) internal {
-        _state.consumedMessages[hash] = true;
-    }
-
-    function chainId() public view returns (uint16) {
+    function chainId() external view returns (uint16) {
         return _state.chainId;
     }
 
@@ -67,6 +59,10 @@ abstract contract WormholeState is Owned {
         }
 
         _state.registeredEmitters[emitterChainId] = emitterAddress;
+    }
+
+    function _consumeMessage(bytes32 hash) internal {
+        _state.consumedMessages[hash] = true;
     }
 
     function _verifyEmitter(IWormhole.VM memory vm) internal view returns (bool) {
