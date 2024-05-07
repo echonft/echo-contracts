@@ -16,23 +16,23 @@ abstract contract EchoState {
     /**
      *  Utils
      */
-    function _generateOfferId(Offer calldata offer) internal returns (bytes32 offerId) {
+    function _generateOfferId(Offer calldata offer) internal pure returns (bytes32 offerId) {
         // TODO Validate this behaviour
         offerId = keccak256(
             abi.encode(
                 offer.sender,
                 offer.receiver,
                 offer.senderItems.chainId,
-                keccak256(abi.encodePacked(offer.senderItems.items)), // OfferItem[]
+                keccak256(abi.encode(offer.senderItems.items)), // OfferItem[]
                 offer.receiverItems.chainId,
-                keccak256(abi.encodePacked(offer.receiverItems.items)), // OfferItem[]
+                keccak256(abi.encode(offer.receiverItems.items)), // OfferItem[]
                 offer.expiration
             )
         );
     }
 
     // @dev Internal function to check that offer data is valid for creation
-    function _validateOffer(bytes32 offerId, Offer calldata offer) internal offerNotExpired(offer.expiration) {
+    function _validateOffer(bytes32 offerId, Offer calldata offer) internal view offerNotExpired(offer.expiration) {
         if (offers[offerId].sender != address(0)) {
             revert OfferAlreadyExist();
         }
@@ -100,7 +100,7 @@ abstract contract EchoState {
         if (offers[offerId].sender == address(0)) {
             revert OfferDoesNotExist();
         }
-        Offer offer = offers[offerId];
+        Offer memory offer = offers[offerId];
 
         if (offer.expiration <= block.timestamp) {
             revert OfferHasExpired();
@@ -114,11 +114,11 @@ abstract contract EchoState {
         offers[offerId].state = OfferState.ACCEPTED;
     }
 
-    function _executeCrossChainOffer(string calldata offerId) internal {
+    function _executeCrossChainOffer(bytes32 offerId) internal {
         if (offers[offerId].sender == address(0)) {
             revert OfferDoesNotExist();
         }
-        Offer offer = offers[offerId];
+        Offer memory offer = offers[offerId];
 
         if (offer.expiration <= block.timestamp) {
             revert OfferHasExpired();
@@ -132,13 +132,6 @@ abstract contract EchoState {
     }
 
     modifier offerNotExpired(uint64 expiration) {
-        if (expiration <= block.timestamp) {
-            revert OfferHasExpired();
-        }
-        _;
-    }
-
-    modifier offerNotState(uint64 expiration) {
         if (expiration <= block.timestamp) {
             revert OfferHasExpired();
         }

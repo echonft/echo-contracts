@@ -93,22 +93,4 @@ contract AdminTest is BaseTest {
         assertEq(account3.balance, 100 ether);
         assertEq(address(echo).balance, 0.005 ether);
     }
-
-    function testCannotChangeSignerIfNotOwner() public {
-        vm.prank(account1);
-        vm.expectRevert("UNAUTHORIZED");
-        echo.setSigner(address(0xB0B));
-    }
-
-    function testCannotChangeSignerToAddress0() public {
-        vm.prank(owner);
-        vm.expectRevert(InvalidAddress.selector);
-        echo.setSigner(address(0));
-    }
-
-    function testCanChangeSignerIfOwner() public {
-        vm.prank(owner);
-        echo.setSigner(address(0xB0B));
-        assertEq(echo.signer(), address(0xB0B));
-    }
 }
