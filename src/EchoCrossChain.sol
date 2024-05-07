@@ -3,16 +3,13 @@ pragma solidity ^0.8.18;
 
 import "contracts/Admin.sol";
 import "contracts/Banker.sol";
+import "contracts/EchoError.sol";
 import "contracts/EchoState.sol";
 import "contracts/MessageValidator.sol";
 import "contracts/escrow/Escrow.sol";
 import "contracts/types/Offer.sol";
 import "contracts/wormhole/WormholeGovernance.sol";
 import "solmate/utils/ReentrancyGuard.sol";
-
-error InvalidSender();
-error InvalidReceiver();
-error InvalidPayment();
 
 contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGovernance, EchoState, MessageValidator {
     constructor(address owner, address wormhole, uint16 chainId, uint8 wormholeFinality)
@@ -23,7 +20,7 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
     /**
      * Same chain offers
      */
-    function createOffer(Offer calldata offer) external payable nonReentrant notPaused {
+    function createOffer(Offer calldata offer) external nonReentrant notPaused {
         // @dev Cannot accept an offer if not the receiver
         if (offer.sender != msg.sender) {
             revert InvalidSender();
@@ -32,6 +29,44 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         _createOffer(offer, _state.chainId);
     }
 
+    function acceptOffer(bytes32 offerId) external payable nonReentrant notPaused {
+        if (msg.value != tradingFee) {
+            revert InvalidPayment();
+        }
+        Offer memory offer = offers[offerId];
+
+        if (offer.sender == address(0)) {
+            revert OfferDoesNotExist();
+        }
+        if (offer.receiver != msg.sender) {
+            revert InvalidReceiver();
+        }
+
+        _deposit(offer.receiverItems, offer.receiver);
+        _acceptOffer(offerId, offer);
+    }
+
+    function executeSwap(bytes32 offerId) external payable nonReentrant notPaused {
+        if (msg.value != tradingFee) {
+            revert InvalidPayment();
+        }
+        Offer memory offer = offers[offerId];
+
+        if (offer.sender == address(0)) {
+            revert OfferDoesNotExist();
+        }
+
+        if (offer.sender != msg.sender) {
+            revert InvalidSender();
+        }
+        _withdraw(offer.senderItems, offer.receiver);
+        _withdraw(offer.receiverItems, offer.sender);
+        _executeOffer(offerId, offer);
+    }
+
+    /**
+     * Cross chain offers
+     */
     function createCrossChainOffer(Offer calldata offer) external payable nonReentrant notPaused {
         // @dev Cannot accept an offer if not the receiver
         if (offer.sender != msg.sender) {

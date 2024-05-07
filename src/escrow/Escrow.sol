@@ -5,11 +5,11 @@ import "contracts/escrow/EscrowHandler.sol";
 import "contracts/types/OfferItems.sol";
 
 abstract contract Escrow is EscrowHandler {
-    function _deposit(OfferItems calldata offerItems, address from) internal {
+    function _deposit(OfferItems memory offerItems, address from) internal {
         _transferOfferItems(offerItems, from, address(this));
     }
 
-    function _withdraw(OfferItems calldata offerItems, address to) internal {
+    function _withdraw(OfferItems memory offerItems, address to) internal {
         _transferOfferItems(offerItems, address(this), to);
     }
 }

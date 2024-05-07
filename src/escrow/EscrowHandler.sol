@@ -10,9 +10,8 @@ abstract contract EscrowHandler is ERC721TokenReceiver {
         collection.safeTransferFrom(from, to, id);
     }
 
-    // TODO add check for chain or size 0?
     // @dev function to transfer items from an offer type
-    function _transferOfferItems(OfferItems calldata offerItems, address from, address to) internal {
+    function _transferOfferItems(OfferItems memory offerItems, address from, address to) internal {
         uint256 length = offerItems.items.length;
         for (uint256 i = 0; i < length;) {
             _transferERC721(offerItems.items[i].tokenAddress, offerItems.items[i].tokenId, from, to);

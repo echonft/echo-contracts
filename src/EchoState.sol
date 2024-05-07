@@ -1,14 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import "contracts/EchoError.sol";
 import "contracts/types/Offer.sol";
 import "contracts/types/OfferItem.sol";
-
-error OfferAlreadyExist();
-error OfferDoesNotExist();
-error OfferHasExpired();
-error InvalidAssets();
-error InvalidOfferState();
 
 abstract contract EchoState {
     mapping(bytes32 => Offer) public offers;
@@ -72,7 +67,23 @@ abstract contract EchoState {
         offers[offerId] = offer;
     }
 
-    function _acceptOffer(Offer calldata offer, uint16 chainId) internal {}
+    function _acceptOffer(bytes32 offerId, Offer memory offer) internal offerNotExpired(offer.expiration) {
+        // @dev Cannot accept an offer if it's not OPEN
+        if (offer.state != OfferState.OPEN) {
+            revert InvalidOfferState();
+        }
+        // TODO Try if we can just change the variable
+        offers[offerId].state = OfferState.ACCEPTED;
+    }
+
+    function _executeOffer(bytes32 offerId, Offer memory offer) internal offerNotExpired(offer.expiration) {
+        // @dev Cannot execute an offer if it's not ACCEPTED
+        if (offer.state != OfferState.ACCEPTED) {
+            revert InvalidOfferState();
+        }
+
+        delete offers[offerId];
+    }
 
     // @dev Internal function to create a cross chain offer. We don't do a check on the addresses here
     // because it might be triggered from a cross chain call. The check is done in the main Echo contract
