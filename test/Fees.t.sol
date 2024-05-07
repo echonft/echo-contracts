@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "./BaseTest.t.sol";
-import "./mock/Mocked721.t.sol";
+import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
 contract FeesTest is BaseTest {

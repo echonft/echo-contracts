@@ -6,7 +6,7 @@ import "contracts/types/OfferItems.sol";
 
 abstract contract EscrowHandler is ERC721TokenReceiver {
     function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {
-        IERC721 collection = IERC721(collectionAddress);
+        ERC721 collection = ERC721(collectionAddress);
         collection.safeTransferFrom(from, to, id);
     }
 
@@ -15,7 +15,7 @@ abstract contract EscrowHandler is ERC721TokenReceiver {
     function _transferOfferItems(OfferItems calldata offerItems, address from, address to) internal {
         uint8 length = offerItems.count;
         for (uint8 i = 0; i < length;) {
-            _transferERC721(offerItems.items[i].tokenAddress.ethAddress, offerItems.items[i].tokenId, from, to);
+            _transferERC721(offerItems.items[i].tokenAddress, offerItems.items[i].tokenId, from, to);
             unchecked {
                 i++;
             }

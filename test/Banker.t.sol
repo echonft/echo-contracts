@@ -5,24 +5,17 @@ import "./BaseTest.t.sol";
 import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
-contract AdminTest is BaseTest {
-    function testCannotPauseIfNotOwner() public {
+contract BankerTest is BaseTest {
+    function testCannotChangeFeesIfNotOwner() public {
         vm.prank(account1);
         vm.expectRevert("UNAUTHORIZED");
-        echo.setPaused(true);
-
-        vm.expectRevert("UNAUTHORIZED");
-        echo.setPaused(false);
+        echo.setFees(0 ether);
     }
 
-    function testCanPauseIfOwner() public {
+    function testCanChangeFeesIfOwner() public {
         vm.prank(owner);
-        echo.setPaused(true);
-        assertEq(echo.paused(), true);
-
-        vm.prank(owner);
-        echo.setPaused(false);
-        assertEq(echo.paused(), false);
+        echo.setFees(0.005 ether);
+        assertEq(echo.tradingFee(), 0.005 ether);
     }
 
     function testCannotWithdrawIfNotOwner() public {
@@ -92,23 +85,5 @@ contract AdminTest is BaseTest {
         echo.withdraw(address(echo));
         assertEq(account3.balance, 100 ether);
         assertEq(address(echo).balance, 0.005 ether);
-    }
-
-    function testCannotChangeSignerIfNotOwner() public {
-        vm.prank(account1);
-        vm.expectRevert("UNAUTHORIZED");
-        echo.setSigner(address(0xB0B));
-    }
-
-    function testCannotChangeSignerToAddress0() public {
-        vm.prank(owner);
-        vm.expectRevert(InvalidAddress.selector);
-        echo.setSigner(address(0));
-    }
-
-    function testCanChangeSignerIfOwner() public {
-        vm.prank(owner);
-        echo.setSigner(address(0xB0B));
-        assertEq(echo.signer(), address(0xB0B));
     }
 }

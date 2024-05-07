@@ -8,7 +8,7 @@ import "solmate/auth/Owned.sol";
 struct State {
     // address of the Wormhole contract on this chain
     address wormhole;
-    // Need to store the chain ID as it might differ from the real id
+    // @dev Need to store the chain ID as it might differ from the real id
     // I.e. Ethereum is chainId = 2 for Wormhole because Solana is chainId = 1
     uint16 chainId;
     /**

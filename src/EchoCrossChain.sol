@@ -3,30 +3,39 @@ pragma solidity ^0.8.18;
 
 import "contracts/Admin.sol";
 import "contracts/Banker.sol";
+import "contracts/EchoState.sol";
 import "contracts/MessageValidator.sol";
 import "contracts/escrow/Escrow.sol";
+import "contracts/types/Offer.sol";
 import "contracts/wormhole/WormholeGovernance.sol";
 import "solmate/utils/ReentrancyGuard.sol";
 
-error OfferAlreadyExist();
-error OfferHasExpired();
-error InvalidOfferStatus();
-error InvalidCounterparty();
-error InvalidAssets();
+error InvalidSender();
+error InvalidReceiver();
 error InvalidPayment();
 
-contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGovernance, MessageValidator {
-    event TradeExecuted(string id);
-
+contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGovernance, EchoState, MessageValidator {
     constructor(address owner, address wormhole, uint16 chainId, uint8 wormholeFinality)
         Admin(owner)
         WormholeGovernance(wormhole, chainId, wormholeFinality)
     {}
 
+    /**
+     * Same chain offers
+     */
     function createOffer(Offer calldata offer) external payable nonReentrant notPaused {
         // @dev Cannot accept an offer if not the receiver
-        if (offer.sender.ethAddress != msg.sender) {
-            revert InvalidCounterparty();
+        if (offer.sender != msg.sender) {
+            revert InvalidSender();
+        }
+        _deposit(offer.senderItems, offer.sender);
+        _createOffer(offer, _state.chainId);
+    }
+
+    function createCrossChainOffer(Offer calldata offer) external payable nonReentrant notPaused {
+        // @dev Cannot accept an offer if not the receiver
+        if (offer.sender != msg.sender) {
+            revert InvalidSender();
         }
     }
 
@@ -37,41 +46,41 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         nonReentrant
         notPaused
     {
-        if (_offers[offerId].sender != address(0)) {
-            revert OfferAlreadyExist();
-        }
-        // @dev Cannot accept an offer if not the receiver
-        if (offer.receiver != msg.sender) {
-            revert InvalidCounterparty();
-        }
-
-        if (offer.expiresAt <= block.timestamp) {
-            revert OfferHasExpired();
-        }
-
-        if (offer.status != OfferStatus.Created) {
-            revert InvalidOfferStatus();
-        }
-
-        // Validate that the offer was created on the other chain
-        EchoMessage memory message = _receiveMessage(encodedMessage);
-        _validateMessage(message, offer);
-
-        _depositForReceiver(offer);
-        _offers[offerId] = offer;
-
-        // @dev FIXME the message should change
-        EchoMessageWithoutPayload memory newMessage = EchoMessageWithoutPayload({
-            id: message.id,
-            evmSender: message.evmSender,
-            evmReceiver: message.evmReceiver,
-            evmTokenAddress: message.evmTokenAddress,
-            evmTokenId: message.evmTokenId,
-            solSender: message.solSender,
-            solReceiver: message.solReceiver,
-            solSenderTokenMint: message.solSenderTokenMint
-        });
-        _sendMessage(newMessage);
+        //        if (_offers[offerId].sender != address(0)) {
+        //            revert OfferAlreadyExist();
+        //        }
+        //        // @dev Cannot accept an offer if not the receiver
+        //        if (offer.receiver != msg.sender) {
+        //            revert InvalidCounterparty();
+        //        }
+        //
+        //        if (offer.expiresAt <= block.timestamp) {
+        //            revert OfferHasExpired();
+        //        }
+        //
+        //        if (offer.status != OfferStatus.Created) {
+        //            revert InvalidOfferStatus();
+        //        }
+        //
+        //        // Validate that the offer was created on the other chain
+        //        EchoMessage memory message = _receiveMessage(encodedMessage);
+        //        _validateMessage(message, offer);
+        //
+        //        _depositForReceiver(offer);
+        //        _offers[offerId] = offer;
+        //
+        //        // @dev FIXME the message should change
+        //        EchoMessageWithoutPayload memory newMessage = EchoMessageWithoutPayload({
+        //            id: message.id,
+        //            evmSender: message.evmSender,
+        //            evmReceiver: message.evmReceiver,
+        //            evmTokenAddress: message.evmTokenAddress,
+        //            evmTokenId: message.evmTokenId,
+        //            solSender: message.solSender,
+        //            solReceiver: message.solReceiver,
+        //            solSenderTokenMint: message.solSenderTokenMint
+        //        });
+        //        _sendMessage(newMessage);
     }
 
     function executeTrade() external payable nonReentrant notPaused {
@@ -120,8 +129,10 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
         //        emit TradeExecuted(trade.id);
     }
 
-    // @dev Wormhole function to receive messages and update trades
-    function receiveMessage(bytes memory encodedMessage) public returns (EchoMessage memory parsedMessage) {
-        parsedMessage = _receiveMessage(encodedMessage);
-    }
+    //    // @dev Wormhole function to receive messages and update trades
+    //    function receiveMessage(
+    //        bytes memory encodedMessage
+    //    ) public returns (EchoMessage memory parsedMessage) {
+    //        parsedMessage = _receiveMessage(encodedMessage);
+    //    }
 }

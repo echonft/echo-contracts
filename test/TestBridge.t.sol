@@ -1,5 +1,5 @@
-//// SPDX-License-Identifier: Apache 2
-//pragma solidity ^0.8.18;
+// SPDX-License-Identifier: Apache 2
+pragma solidity ^0.8.18;
 //
 //import "./utils/WormholeSimulator.sol";
 //import "./utils/EchoCrossChainTest.sol";

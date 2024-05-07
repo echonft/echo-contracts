@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "forge-std/Script.sol";
-import "../test/mock/Mocked721.t.sol";
+import "../test/mock/Mocked721.sol";
 
 contract MintNfts is Script {
     // Exclude from coverage report

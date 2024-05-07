@@ -5,6 +5,6 @@ import "contracts/types/OfferItem.sol";
 
 // @dev Struct representing multiple offer items. We store the count for decoding purposes
 struct OfferItems {
-    uint8 count;
+    uint16 chainId;
     OfferItem[] items;
 }
