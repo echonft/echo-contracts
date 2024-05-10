@@ -2,16 +2,16 @@
 pragma solidity ^0.8.18;
 
 import "./MockWormhole.sol";
-import "contracts/wormhole/BytesLib.sol";
-import "contracts/wormhole/IWormhole.sol";
 import "forge-std/Vm.sol";
-import "forge-std/console.sol";
 
 /**
  * @notice These are the common parts for the signing and the non signing wormhole simulators.
  * @dev This contract is meant to be used when testing against a mainnet fork.
  */
 abstract contract WormholeSimulator {
+    // Exclude from coverage report
+    function test() public virtual {}
+
     using BytesLib for bytes;
 
     function doubleKeccak256(bytes memory body) internal pure returns (bytes32) {
@@ -159,6 +159,9 @@ abstract contract WormholeSimulator {
  *   as its hash wasn't banned.
  */
 contract FakeWormholeSimulator is WormholeSimulator {
+    // Exclude from coverage report
+    function test() public override {}
+
     // Allow access to Wormhole
     MockWormhole public wormhole;
 
@@ -281,6 +284,9 @@ contract FakeWormholeSimulator is WormholeSimulator {
  * @dev This contract is meant to be used when testing against a mainnet fork.
  */
 contract SigningWormholeSimulator is WormholeSimulator {
+    // Exclude from coverage report
+    function test() public override {}
+
     // Taken from forge-std/Script.sol
     address private constant VM_ADDRESS = address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
     Vm public constant vm = Vm(VM_ADDRESS);

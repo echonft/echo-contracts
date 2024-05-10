@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/wormhole/IWormhole.sol";
-import "contracts/wormhole/WormholeError.sol";
 import "solmate/auth/Owned.sol";
+import "./WormholeError.sol";
+import "../../lib/wormhole/IWormhole.sol";
 
 struct State {
     // address of the Wormhole contract on this chain

@@ -3,14 +3,13 @@ pragma solidity ^0.8.18;
 
 import "./mock/Mocked721.sol";
 import "./mock/MockHandler.sol";
-import "./mock/WormholeSimulator.sol";
 import "forge-std/Test.sol";
 import "./utils/OfferUtils.sol";
 import "../src/EchoCrossChain.sol";
 
 abstract contract BaseTest is Test, OfferUtils {
     // Exclude from coverage report
-    function test() public {}
+    function test() public override {}
 
     EchoCrossChain public echo;
 

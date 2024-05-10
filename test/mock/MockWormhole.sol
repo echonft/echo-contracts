@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity ^0.8.18;
 
-import "contracts/wormhole/IWormhole.sol";
-import "contracts/wormhole/BytesLib.sol";
+import "../../lib/wormhole/BytesLib.sol";
+import "../../lib/wormhole/IWormhole.sol";
 
 contract MockWormhole is IWormhole {
+    // Exclude from coverage report
+    function test() public {}
+
     using BytesLib for bytes;
 
     uint256 private constant VM_VERSION_SIZE = 1;

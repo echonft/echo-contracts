@@ -10,16 +10,15 @@
   },
   "scripts": {
     "build": "forge build",
-    "coverage": "forge coverage --report lcov",
-    "coverage:summary": "forge coverage --report summary",
+    "coverage": "forge coverage --match-path ./test/**/*.t.sol --report lcov",
+    "coverage:summary": "forge coverage --match-path ./test/**/*.t.sol --report summary",
     "prepare": "husky install",
     "pretty": "forge fmt",
     "modules:remove": "rm -rf node_modules; rm -rf pnpm-lock.yaml",
     "modules:update": "ncu -u --deep",
     "modules:update-minor": "ncu -u --deep --target=minor",
     "snapshot": "forge snapshot; cat .gas-snapshot",
-    "test": "forge test -vvv",
-    "test:bridge": "forge test --fork-url https://api.avax.network/ext/bc/C/rpc -vvv",
+    "test": "forge test --match-path ./test/**/*.t.sol -vvv",
     "test:gas-report": "forge test --gas-report"
   },
   "devDependencies": {

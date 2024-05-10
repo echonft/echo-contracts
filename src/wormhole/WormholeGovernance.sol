@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/wormhole/IWormhole.sol";
-import "contracts/wormhole/Message.sol";
-import "contracts/wormhole/WormholeError.sol";
-import "contracts/wormhole/WormholeState.sol";
 import "solmate/auth/Owned.sol";
+import "./Message.sol";
+import "./WormholeError.sol";
+import "./WormholeState.sol";
+import "../../lib/wormhole/IWormhole.sol";
 
 abstract contract WormholeGovernance is Owned, Message, WormholeState {
     constructor(address wormhole_, uint16 _chainId, uint8 wormholeFinality_) {

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/EchoError.sol";
-import "contracts/types/Offer.sol";
-import "contracts/types/OfferItem.sol";
+import "./types/Offer.sol";
+import "./EchoError.sol";
 
 abstract contract EchoState {
     mapping(bytes32 => Offer) public offers;

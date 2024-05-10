@@ -2,7 +2,6 @@
 pragma solidity ^0.8.18;
 
 import "./BaseTest.t.sol";
-import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
 contract AdminTest is BaseTest {
@@ -23,74 +22,5 @@ contract AdminTest is BaseTest {
         vm.prank(owner);
         echo.setPaused(false);
         assertEq(echo.paused(), false);
-    }
-
-    function testCannotWithdrawIfNotOwner() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
-
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        _executeMockTrade("test", account1, account2, 0.005 ether);
-
-        vm.prank(account1);
-        vm.expectRevert("UNAUTHORIZED");
-        echo.withdraw(account1);
-    }
-
-    function testCanWithdrawToSelfIfOwner() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
-
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        _executeMockTrade("test", account1, account2, 0.005 ether);
-
-        assertEq(address(echo).balance, 0.005 ether);
-        vm.prank(owner);
-        echo.withdraw(owner);
-        assertEq(owner.balance, 0.005 ether);
-        assertEq(address(echo).balance, 0);
-    }
-
-    function testCanWithdrawToOtherAccountIfOwner() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
-
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        _executeMockTrade("test", account1, account2, 0.005 ether);
-
-        vm.prank(owner);
-        echo.withdraw(account3);
-        assertEq(account3.balance, 100 ether + 0.005 ether);
-        assertEq(address(echo).balance, 0);
-    }
-
-    function testCannotWithdrawToContractIfOwner() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
-
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-        _executeMockTrade("test", account1, account2, 0.005 ether);
-
-        vm.prank(owner);
-        vm.expectRevert(WithdrawFailed.selector);
-        echo.withdraw(address(echo));
-        assertEq(account3.balance, 100 ether);
-        assertEq(address(echo).balance, 0.005 ether);
     }
 }

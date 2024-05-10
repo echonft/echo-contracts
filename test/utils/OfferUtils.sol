@@ -8,6 +8,9 @@ import "../../src/types/OfferItem.sol";
 import "../../src/types/OfferItems.sol";
 
 abstract contract OfferUtils is Test {
+    // Exclude from coverage report
+    function test() public virtual {}
+
     OfferItem[] public senderItems;
     OfferItem[] public receiverItems;
 
@@ -40,9 +43,9 @@ abstract contract OfferUtils is Test {
         uint256 expiration,
         OfferState state
     ) public returns (Offer memory offer) {
-        require(senderTokenAddresses.length != senderTokenIds.length, "Sender items arrays do not match");
+        require(senderTokenAddresses.length == senderTokenIds.length, "Sender items arrays do not match");
 
-        require(receiverTokenAddresses.length != receiverTokenIds.length, "Receiver items arrays do not match");
+        require(receiverTokenAddresses.length == receiverTokenIds.length, "Receiver items arrays do not match");
 
         for (uint256 i = 0; i < senderTokenAddresses.length; i++) {
             senderItems.push(OfferItem({tokenAddress: senderTokenAddresses[i], tokenId: senderTokenIds[i]}));

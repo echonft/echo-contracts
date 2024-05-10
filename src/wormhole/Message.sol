@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/wormhole/BytesLib.sol";
-import "contracts/wormhole/WormholeError.sol";
+import "../../lib/wormhole/BytesLib.sol";
 
 abstract contract Message {
     using BytesLib for bytes;
