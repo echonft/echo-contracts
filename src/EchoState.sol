@@ -142,7 +142,7 @@ abstract contract EchoState {
         delete offers[offerId];
     }
 
-    modifier offerNotExpired(uint64 expiration) {
+    modifier offerNotExpired(uint256 expiration) {
         if (expiration <= block.timestamp) {
             revert OfferHasExpired();
         }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/types/OfferItems.sol";
+import "./OfferItems.sol";
 
 enum OfferState {
     OPEN,
@@ -14,6 +14,6 @@ struct Offer {
     address receiver;
     OfferItems senderItems;
     OfferItems receiverItems;
-    uint64 expiration;
+    uint256 expiration;
     OfferState state;
 }

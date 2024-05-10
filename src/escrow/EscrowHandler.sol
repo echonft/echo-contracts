@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "solmate/tokens/ERC721.sol";
-import "contracts/types/OfferItems.sol";
+import "../types/OfferItems.sol";
 
 abstract contract EscrowHandler is ERC721TokenReceiver {
     function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {

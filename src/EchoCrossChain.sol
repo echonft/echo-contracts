@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/Admin.sol";
-import "contracts/Banker.sol";
-import "contracts/EchoError.sol";
-import "contracts/EchoState.sol";
-import "contracts/MessageValidator.sol";
-import "contracts/escrow/Escrow.sol";
-import "contracts/types/Offer.sol";
-import "contracts/wormhole/WormholeGovernance.sol";
 import "solmate/utils/ReentrancyGuard.sol";
+import "./Admin.sol";
+import "./Banker.sol";
+import "./EchoState.sol";
+import "./escrow/Escrow.sol";
+import "./types/Offer.sol";
 
-contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGovernance, EchoState, MessageValidator {
-    constructor(address owner, address wormhole, uint16 chainId, uint8 wormholeFinality)
-        Admin(owner)
-        WormholeGovernance(wormhole, chainId, wormholeFinality)
-    {}
+contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
+    // @dev For future use...
+    uint16 private chainId;
+
+    constructor(address owner) Admin(owner) {
+        chainId = uint16(block.chainid);
+    }
 
     /**
      * Same chain offers
@@ -26,7 +25,7 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
             revert InvalidSender();
         }
         _deposit(offer.senderItems, offer.sender);
-        _createOffer(offer, _state.chainId);
+        _createOffer(offer, chainId);
     }
 
     function acceptOffer(bytes32 offerId) external payable nonReentrant notPaused {
@@ -75,12 +74,11 @@ contract EchoCrossChain is ReentrancyGuard, Admin, Banker, Escrow, WormholeGover
     }
 
     // @dev This function assumes that the offer was created on another chain.
-    function acceptOffer(string calldata offerId, Offer calldata offer, bytes memory encodedMessage)
-        external
-        payable
-        nonReentrant
-        notPaused
-    {
+    function acceptOffer(
+        string calldata offerId,
+        Offer calldata offer,
+        bytes memory encodedMessage
+    ) external payable nonReentrant notPaused {
         //        if (_offers[offerId].sender != address(0)) {
         //            revert OfferAlreadyExist();
         //        }

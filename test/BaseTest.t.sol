@@ -4,22 +4,17 @@ pragma solidity ^0.8.18;
 import "./mock/Mocked721.sol";
 import "./mock/MockHandler.sol";
 import "./mock/WormholeSimulator.sol";
-import "contracts/EchoCrossChain.sol";
-import "contracts/wormhole/IWormhole.sol";
 import "forge-std/Test.sol";
+import "./utils/OfferUtils.sol";
+import "../src/EchoCrossChain.sol";
 
-abstract contract BaseTest is Test {
+abstract contract BaseTest is Test, OfferUtils {
     // Exclude from coverage report
     function test() public {}
 
-    // guardian private key for simulated signing of Wormhole messages
-    uint256 guardianSigner;
-
-    // contract instances
-    IWormhole wormhole;
-    WormholeSimulator wormholeSimulator;
-
     EchoCrossChain public echo;
+
+    // TODO Remove?
     // To test internal function as it's impossible to reach the code
     // from echo (echo also checks for length)
     MockedHandler public handler;
@@ -50,8 +45,6 @@ abstract contract BaseTest is Test {
     address[] public counterparty721Collections;
     uint256[] public counterparty721Ids;
 
-    uint256 public in6hours;
-
     function setUp() public {
         // Generate account2 and signer from private key.
         account2 = vm.addr(account2PrivateKey);
@@ -63,28 +56,7 @@ abstract contract BaseTest is Test {
         vm.deal(account3, 100 ether);
         vm.deal(account4, 100 ether);
 
-        /* Initialize wormhole */
-        // verify that we're using the correct fork (AVAX mainnet in this case)
-        require(block.chainid == vm.envUint("TESTING_AVAX_FORK_CHAINID"), "wrong evm");
-
-        // this will be used to sign Wormhole messages
-        guardianSigner = uint256(vm.envBytes32("TESTING_DEVNET_GUARDIAN"));
-
-        // we may need to interact with Wormhole throughout the test
-        wormhole = IWormhole(vm.envAddress("TESTING_AVAX_WORMHOLE_ADDRESS"));
-
-        // set up Wormhole using Wormhole existing on AVAX mainnet
-        wormholeSimulator = new SigningWormholeSimulator(wormhole, guardianSigner);
-
-        // verify Wormhole state from fork
-        require(wormhole.chainId() == uint16(vm.envUint("TESTING_AVAX_WORMHOLE_CHAINID")), "wrong chainId");
-        require(wormhole.messageFee() == vm.envUint("TESTING_AVAX_WORMHOLE_MESSAGE_FEE"), "wrong messageFee");
-        require(
-            wormhole.getCurrentGuardianSetIndex() == uint32(vm.envUint("TESTING_AVAX_WORMHOLE_GUARDIAN_SET_INDEX")),
-            "wrong guardian set index"
-        );
-
-        echo = new EchoCrossChain(address(owner), address(wormhole), wormhole.chainId(), uint8(1));
+        echo = new EchoCrossChain(address(owner));
         handler = new MockedHandler();
 
         apes = new Mocked721("Apes", "APE");
@@ -116,6 +88,34 @@ abstract contract BaseTest is Test {
         vm.stopPrank();
 
         in6hours = block.timestamp + (60 * 60 * 6);
+    }
+
+    function _createMockOffer() internal returns (Offer memory offer) {
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
+
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account1);
+        echo.createOffer(offer);
     }
 
     // @dev Method to execute a mock trade with predefined values

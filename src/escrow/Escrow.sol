@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "contracts/escrow/EscrowHandler.sol";
-import "contracts/types/OfferItems.sol";
+import "./EscrowHandler.sol";
+import "../types/OfferItems.sol";
 
 abstract contract Escrow is EscrowHandler {
     function _deposit(OfferItems memory offerItems, address from) internal {
