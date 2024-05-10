@@ -84,63 +84,6 @@ abstract contract EchoState {
         delete offers[offerId];
     }
 
-    // @dev Internal function to create a cross chain offer. We don't do a check on the addresses here
-    // because it might be triggered from a cross chain call. The check is done in the main Echo contract
-    function _createCrossChainOffer(Offer calldata offer, uint16 chainId) internal {
-        bytes32 offerId = _generateOfferId(offer);
-
-        _validateOffer(offerId, offer);
-
-        // @dev Chain must be the same as contract for sender items on cross chain offers
-        if (offer.senderItems.chainId != chainId) {
-            revert InvalidAssets();
-        }
-
-        // @dev Cannot create a cross chain offer on the same chain
-        if (offer.receiverItems.chainId == chainId) {
-            revert InvalidAssets();
-        }
-
-        offers[offerId] = offer;
-    }
-
-    // @dev Internal function to accept the offer. We don't do a check on the addresses here
-    // because it might be triggered from a cross chain call. The check is done in the main Echo contract
-    function _acceptCrossChainOffer(bytes32 offerId) internal {
-        if (offers[offerId].sender == address(0)) {
-            revert OfferDoesNotExist();
-        }
-        Offer memory offer = offers[offerId];
-
-        if (offer.expiration <= block.timestamp) {
-            revert OfferHasExpired();
-        }
-
-        // @dev Cannot accept an offer if it's not OPEN
-        if (offer.state != OfferState.OPEN) {
-            revert InvalidOfferState();
-        }
-        // TODO Try if we can just change the variable
-        offers[offerId].state = OfferState.ACCEPTED;
-    }
-
-    function _executeCrossChainOffer(bytes32 offerId) internal {
-        if (offers[offerId].sender == address(0)) {
-            revert OfferDoesNotExist();
-        }
-        Offer memory offer = offers[offerId];
-
-        if (offer.expiration <= block.timestamp) {
-            revert OfferHasExpired();
-        }
-        // @dev Cannot execute an offer if it's not ACCEPTED
-        if (offer.state != OfferState.ACCEPTED) {
-            revert InvalidOfferState();
-        }
-
-        delete offers[offerId];
-    }
-
     modifier offerNotExpired(uint256 expiration) {
         if (expiration <= block.timestamp) {
             revert OfferHasExpired();
