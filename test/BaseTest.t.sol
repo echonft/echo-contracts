@@ -117,6 +117,16 @@ abstract contract BaseTest is Test, OfferUtils {
         echo.createOffer(offer);
     }
 
+    function _setFees() internal {
+        vm.prank(owner);
+        echo.setFees(0.005 ether);
+    }
+
+    function _setPaused() internal {
+        vm.prank(owner);
+        echo.setPaused(true);
+    }
+
     // @dev Method to execute a mock trade with predefined values
     // @dev Do not use this method if you expect a revert as the way Foundry is built, it won't catch the revert
     function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {

@@ -7,6 +7,37 @@ import "../src/types/OfferItems.sol";
 import "../src/types/Offer.sol";
 
 contract CreateOfferTest is BaseTest {
+    function testCannotCreateOfferIfPaused() public {
+        _setPaused();
+
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
+
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        Offer memory offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account1);
+        vm.expectRevert(Paused.selector);
+        echo.createOffer(offer);
+    }
+
     function testCannotCreateOfferIfAlreadyExpired() public {
         address[] memory senderTokenAddresses = new address[](1);
         senderTokenAddresses[0] = apeAddress;
@@ -179,7 +210,6 @@ contract CreateOfferTest is BaseTest {
     //        vm.expectRevert(OfferAlreadyExist.selector);
     //        echo.createOffer(secondOffer);
     //    }
-    // Creating a same chain offer
 
     function testCanCreateOfferSingleAsset() public {
         Offer memory offer = _createMockOffer();

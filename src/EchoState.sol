@@ -71,7 +71,6 @@ abstract contract EchoState {
         if (offer.state != OfferState.OPEN) {
             revert InvalidOfferState();
         }
-        // TODO Try if we can just change the variable
         offers[offerId].state = OfferState.ACCEPTED;
     }
 
