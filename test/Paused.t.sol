@@ -5,8 +5,10 @@ import "./BaseTest.t.sol";
 import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
-contract ExpirationTest is BaseTest {
-    function testCannotCreateOfferIfAlreadyExpired() public {
+contract PausedTest is BaseTest {
+    function testCannotCreateOfferIfPaused() public {
+        _setPaused();
+
         address[] memory senderTokenAddresses = new address[](1);
         senderTokenAddresses[0] = apeAddress;
         uint256[] memory senderTokenIds = new uint256[](1);
@@ -26,42 +28,42 @@ contract ExpirationTest is BaseTest {
             receiverTokenAddresses,
             receiverTokenIds,
             block.chainid,
-            block.timestamp,
+            in6hours,
             OfferState.OPEN
         );
 
         vm.prank(account1);
-        vm.expectRevert(OfferHasExpired.selector);
+        vm.expectRevert(Paused.selector);
         echo.createOffer(offer);
     }
 
-    function testCannotCancelOfferIfAlreadyExpired() public {
+    function testCannotAcceptOfferIfPaused() public {
         Offer memory offer = _createSingleAssetOffer();
         bytes32 offerId = generateOfferId(offer);
+        _setPaused();
 
-        vm.warp(in6hours);
-        vm.prank(account1);
-        vm.expectRevert(OfferHasExpired.selector);
-        echo.cancelOffer(offerId);
-    }
-
-    function testCannotAcceptOfferIfAlreadyExpired() public {
-        Offer memory offer = _createSingleAssetOffer();
-        bytes32 offerId = generateOfferId(offer);
-
-        vm.warp(in6hours);
         vm.prank(account2);
-        vm.expectRevert(OfferHasExpired.selector);
+        vm.expectRevert(Paused.selector);
         echo.acceptOffer(offerId);
     }
 
-    function testCannotExecuteOfferIfAlreadyExpired() public {
+    function testCannotCancelOfferIfPaused() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+        _setPaused();
+
+        vm.prank(account1);
+        vm.expectRevert(Paused.selector);
+        echo.cancelOffer(offerId);
+    }
+
+    function testCannotExecuteOfferIfPaused() public {
         Offer memory offer = _createAndAcceptSingleAssetOffer();
         bytes32 offerId = generateOfferId(offer);
+        _setPaused();
 
-        vm.warp(in6hours);
         vm.prank(account1);
-        vm.expectRevert(OfferHasExpired.selector);
+        vm.expectRevert(Paused.selector);
         echo.executeOffer(offerId);
     }
 }

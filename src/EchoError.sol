@@ -6,6 +6,8 @@ error InvalidOfferState();
 error InvalidPayment();
 error InvalidReceiver();
 error InvalidSender();
+error InvalidRecipient();
 error OfferAlreadyExist();
 error OfferDoesNotExist();
 error OfferHasExpired();
+error OfferHasNotExpired();

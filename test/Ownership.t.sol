@@ -6,97 +6,59 @@ import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
 contract OwnershipTest is BaseTest {
-    // Sender is not creator
-    function testCannotCreateOfferIfNotCreator() public {
-        senderItems.push(OfferItem({tokenAddress: apeAddress, tokenId: ape1Id}));
-        receiverItems.push(OfferItem({tokenAddress: birdAddress, tokenId: bird1Id}));
+    function testCannotCreateOfferIfNotSender() public {
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
 
-        Offer memory offer = Offer({
-            sender: account1,
-            receiver: account2,
-            senderItems: OfferItems({chainId: block.chainid, items: senderItems}),
-            receiverItems: OfferItems({chainId: block.chainid, items: receiverItems}),
-            expiration: in6hours,
-            state: OfferState.OPEN
-        });
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        Offer memory offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account2);
+        vm.expectRevert(InvalidSender.selector);
+        echo.createOffer(offer);
     }
-    //    function testCannotExecuteTradeIfNotCreator() public {
-    //        creator721Collections.push(apeAddress);
-    //        creator721Ids.push(ape1Id);
-    //        counterparty721Collections.push(birdAddress);
-    //        counterparty721Ids.push(bird1Id);
-    //
-    //        Trade memory trade = Trade({
-    //            id: "test",
-    //            creator: account1,
-    //            counterparty: account2,
-    //            expiresAt: in6hours,
-    //            creatorCollections: creator721Collections,
-    //            creatorIds: creator721Ids,
-    //            counterpartyCollections: counterparty721Collections,
-    //            counterpartyIds: counterparty721Ids
-    //        });
-    //
-    //        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
-    //            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
-    //        // Counterparty
-    //        vm.prank(account2);
-    //        vm.expectRevert(InvalidCreator.selector);
-    //        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
-    //
-    //        // Random account
-    //        vm.prank(account3);
-    //        vm.expectRevert(InvalidCreator.selector);
-    //        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
-    //    }
-    //
-    //    // Creator is not owner
-    //    function testCannotExecuteTradeIfCreatorNotOwner() public {
-    //        creator721Collections.push(apeAddress);
-    //        creator721Ids.push(ape1Id);
-    //        counterparty721Collections.push(birdAddress);
-    //        counterparty721Ids.push(bird1Id);
-    //
-    //        Trade memory trade = Trade({
-    //            id: "test",
-    //            creator: account3,
-    //            counterparty: account2,
-    //            expiresAt: in6hours,
-    //            creatorCollections: creator721Collections,
-    //            creatorIds: creator721Ids,
-    //            counterpartyCollections: counterparty721Collections,
-    //            counterpartyIds: counterparty721Ids
-    //        });
-    //
-    //        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
-    //            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
-    //        vm.prank(account3);
-    //        vm.expectRevert(bytes("WRONG_FROM"));
-    //        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
-    //    }
-    //
-    //    // TODO Should be the same error message as the other?
-    //    // Counterparty is not owner
-    //    function testCannotExecuteTradeIfCounterpartyNotOwner() public {
-    //        creator721Collections.push(apeAddress);
-    //        creator721Ids.push(ape1Id);
-    //        counterparty721Collections.push(birdAddress);
-    //        counterparty721Ids.push(bird3Id);
-    //        Trade memory trade = Trade({
-    //            id: "test",
-    //            creator: account1,
-    //            counterparty: account2,
-    //            expiresAt: in6hours,
-    //            creatorCollections: creator721Collections,
-    //            creatorIds: creator721Ids,
-    //            counterpartyCollections: counterparty721Collections,
-    //            counterpartyIds: counterparty721Ids
-    //        });
-    //
-    //        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
-    //            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
-    //        vm.prank(account1);
-    //        vm.expectRevert(bytes("WRONG_FROM"));
-    //        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
-    //    }
+
+    function testCannotCancelOfferIfNotSender() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account3);
+        vm.expectRevert(InvalidReceiver.selector);
+        echo.cancelOffer(offerId);
+    }
+
+    function testCannotAcceptOfferIfNotReceiver() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account3);
+        vm.expectRevert(InvalidReceiver.selector);
+        echo.acceptOffer(offerId);
+    }
+
+    function testCannotExecuteOfferIfNotSender() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        vm.expectRevert(InvalidSender.selector);
+        echo.executeOffer(offerId);
+    }
 }

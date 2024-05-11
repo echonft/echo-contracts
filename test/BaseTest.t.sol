@@ -2,21 +2,15 @@
 pragma solidity ^0.8.18;
 
 import "./mock/Mocked721.sol";
-import "./mock/MockHandler.sol";
 import "forge-std/Test.sol";
 import "./utils/OfferUtils.sol";
-import "../src/EchoCrossChain.sol";
+import "../src/Echo.sol";
 
 abstract contract BaseTest is Test, OfferUtils {
     // Exclude from coverage report
     function test() public override {}
 
-    EchoCrossChain public echo;
-
-    // TODO Remove?
-    // To test internal function as it's impossible to reach the code
-    // from echo (echo also checks for length)
-    MockedHandler public handler;
+    Echo public echo;
 
     Mocked721 public apes;
     Mocked721 public birds;
@@ -39,11 +33,6 @@ abstract contract BaseTest is Test, OfferUtils {
     uint256 public bird2Id;
     uint256 public bird3Id;
 
-    address[] public creator721Collections;
-    uint256[] public creator721Ids;
-    address[] public counterparty721Collections;
-    uint256[] public counterparty721Ids;
-
     function setUp() public {
         // Generate account2 and signer from private key.
         account2 = vm.addr(account2PrivateKey);
@@ -55,8 +44,7 @@ abstract contract BaseTest is Test, OfferUtils {
         vm.deal(account3, 100 ether);
         vm.deal(account4, 100 ether);
 
-        echo = new EchoCrossChain(address(owner));
-        handler = new MockedHandler();
+        echo = new Echo(address(owner));
 
         apes = new Mocked721("Apes", "APE");
         birds = new Mocked721("Birds", "BIRD");
@@ -89,7 +77,7 @@ abstract contract BaseTest is Test, OfferUtils {
         in6hours = block.timestamp + (60 * 60 * 6);
     }
 
-    function _createMockOffer() internal returns (Offer memory offer) {
+    function _createSingleAssetOffer() internal returns (Offer memory offer) {
         address[] memory senderTokenAddresses = new address[](1);
         senderTokenAddresses[0] = apeAddress;
         uint256[] memory senderTokenIds = new uint256[](1);
@@ -115,38 +103,81 @@ abstract contract BaseTest is Test, OfferUtils {
 
         vm.prank(account1);
         echo.createOffer(offer);
+        vm.stopPrank();
+    }
+
+    function _createMultipleAssetsOffer() internal returns (Offer memory offer) {
+        address[] memory senderTokenAddresses = new address[](2);
+        senderTokenAddresses[0] = apeAddress;
+        senderTokenAddresses[1] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](2);
+        senderTokenIds[0] = ape1Id;
+        senderTokenIds[1] = ape2Id;
+
+        address[] memory receiverTokenAddresses = new address[](2);
+        receiverTokenAddresses[0] = birdAddress;
+        receiverTokenAddresses[1] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](2);
+        receiverTokenIds[0] = bird1Id;
+        receiverTokenIds[1] = bird2Id;
+
+        offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account1);
+        echo.createOffer(offer);
+        vm.stopPrank();
+    }
+
+    function _createAndAcceptSingleAssetOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        echo.acceptOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
+    }
+
+    function _createAndAcceptMultipleAssetsOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createMultipleAssetsOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        echo.acceptOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
+    }
+
+    function _executeSingleAssetOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        echo.executeOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
     }
 
     function _setFees() internal {
         vm.prank(owner);
         echo.setFees(0.005 ether);
+        vm.stopPrank();
     }
 
     function _setPaused() internal {
         vm.prank(owner);
         echo.setPaused(true);
-    }
-
-    // @dev Method to execute a mock trade with predefined values
-    // @dev Do not use this method if you expect a revert as the way Foundry is built, it won't catch the revert
-    function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {
-        //        Trade memory trade = Trade({
-        //            id: id,
-        //            creator: creator,
-        //            counterparty: counter,
-        //            expiresAt: in6hours,
-        //            creatorCollections: creator721Collections,
-        //            creatorIds: creator721Ids,
-        //            counterpartyCollections: counterparty721Collections,
-        //            counterpartyIds: counterparty721Ids
-        //        });
-        //        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        //        Signature memory signature = Signature({v: v, r: r, s: s});
-        //        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signSignature(
-        //            signature,
-        //            signerPrivateKey
-        //        );
-        //        vm.prank(creator);
-        //        echo.executeTrade{value: fees}(vSigner, rSigner, sSigner, signature, trade);
+        vm.stopPrank();
     }
 }
