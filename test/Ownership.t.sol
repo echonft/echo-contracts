@@ -61,4 +61,22 @@ contract OwnershipTest is BaseTest {
         vm.expectRevert(InvalidSender.selector);
         echo.executeOffer(offerId);
     }
+
+    function testCannotRedeemOpenOfferIfNotSenderOrReceiver() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account3);
+        vm.expectRevert(InvalidRecipient.selector);
+        echo.redeemOffer(offerId);
+    }
+
+    function testCannotRedeemAcceptedOfferIfNotSenderOrReceiver() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account3);
+        vm.expectRevert(InvalidRecipient.selector);
+        echo.redeemOffer(offerId);
+    }
 }

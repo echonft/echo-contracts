@@ -64,4 +64,40 @@ contract ExpirationTest is BaseTest {
         vm.expectRevert(OfferHasExpired.selector);
         echo.executeOffer(offerId);
     }
+
+    function testSenderCannotRedeemOpenOfferIfNotExpired() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        vm.expectRevert(OfferHasNotExpired.selector);
+        echo.redeemOffer(offerId);
+    }
+
+    function testReceiverCannotRedeemOpenOfferIfNotExpired() public {
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        vm.expectRevert(OfferHasNotExpired.selector);
+        echo.redeemOffer(offerId);
+    }
+
+    function testSenderCannotRedeemAcceptedOfferIfNotExpired() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        vm.expectRevert(OfferHasNotExpired.selector);
+        echo.redeemOffer(offerId);
+    }
+
+    function testReceiverCannotRedeemAcceptedOfferIfNotExpired() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        vm.expectRevert(OfferHasNotExpired.selector);
+        echo.redeemOffer(offerId);
+    }
 }
