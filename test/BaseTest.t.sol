@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./mock/Mocked721.t.sol";
-import "./mock/MockHandler.t.sol";
-import "./utils/Constants.sol";
 import "forge-std/Test.sol";
-import "src/Echo.sol";
+import "./mock/Mocked721.sol";
+import "./utils/OfferUtils.sol";
+import "../src/Echo.sol";
 
-abstract contract BaseTest is Test, Constants {
+abstract contract BaseTest is Test, OfferUtils {
+    event OfferCreated(bytes32 indexed offerId);
+    event OfferAccepted(bytes32 indexed offerId);
+    event OfferCanceled(bytes32 indexed offerId);
+    event OfferExecuted(bytes32 indexed offerId);
+
     // Exclude from coverage report
-    function test() public {}
-
-    event TradeExecuted(string id);
+    function test() public override {}
 
     Echo public echo;
-    // To test internal function as it's impossible to reach the code
-    // from echo (echo also checks for length)
-    MockedHandler public handler;
 
     Mocked721 public apes;
     Mocked721 public birds;
@@ -39,13 +38,6 @@ abstract contract BaseTest is Test, Constants {
     uint256 public bird2Id;
     uint256 public bird3Id;
 
-    address[] public creator721Collections;
-    uint256[] public creator721Ids;
-    address[] public counterparty721Collections;
-    uint256[] public counterparty721Ids;
-
-    uint256 public in6hours;
-
     function setUp() public {
         // Generate account2 and signer from private key.
         account2 = vm.addr(account2PrivateKey);
@@ -57,8 +49,7 @@ abstract contract BaseTest is Test, Constants {
         vm.deal(account3, 100 ether);
         vm.deal(account4, 100 ether);
 
-        echo = new Echo({owner: owner, signer: signer});
-        handler = new MockedHandler();
+        echo = new Echo(address(owner));
 
         apes = new Mocked721("Apes", "APE");
         birds = new Mocked721("Birds", "BIRD");
@@ -91,65 +82,126 @@ abstract contract BaseTest is Test, Constants {
         in6hours = block.timestamp + (60 * 60 * 6);
     }
 
-    // @dev Sign the trade with private key
-    function _signTrade(Trade memory trade, uint256 privateKey) internal view returns (uint8 v, bytes32 r, bytes32 s) {
-        bytes32 hashStruct = keccak256(
-            abi.encode(
-                TRADE_TYPEHASH,
-                keccak256(bytes(trade.id)),
-                trade.creator,
-                trade.counterparty,
-                trade.expiresAt,
-                keccak256(abi.encodePacked(trade.creatorCollections)), // address[]
-                keccak256(abi.encodePacked(trade.creatorIds)), // uint256[]
-                keccak256(abi.encodePacked(trade.counterpartyCollections)), // address[]
-                keccak256(abi.encodePacked(trade.counterpartyIds)) // uint256[]
-            )
+    function _createSingleAssetOffer() internal returns (Offer memory offer) {
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
+
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
         );
 
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), hashStruct));
-        (v, r, s) = vm.sign(privateKey, digest);
+        bytes32 offerId = generateOfferId(offer);
+        vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCreated(offerId);
+        echo.createOffer(offer);
+        vm.stopPrank();
     }
 
-    // @dev Sign the signature with the private key. This is simulating the backend signing
-    function _signSignature(Signature memory signature, uint256 privateKey)
-        internal
-        view
-        returns (uint8 v, bytes32 r, bytes32 s)
-    {
-        bytes32 hashStruct = keccak256(abi.encode(SIGNATURE_TYPEHASH, signature.v, signature.r, signature.s));
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", echo.domainSeparator(), hashStruct));
-        (v, r, s) = vm.sign(privateKey, digest);
+    function _createMultipleAssetsOffer() internal returns (Offer memory offer) {
+        address[] memory senderTokenAddresses = new address[](2);
+        senderTokenAddresses[0] = apeAddress;
+        senderTokenAddresses[1] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](2);
+        senderTokenIds[0] = ape1Id;
+        senderTokenIds[1] = ape2Id;
+
+        address[] memory receiverTokenAddresses = new address[](2);
+        receiverTokenAddresses[0] = birdAddress;
+        receiverTokenAddresses[1] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](2);
+        receiverTokenIds[0] = bird1Id;
+        receiverTokenIds[1] = bird2Id;
+
+        offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCreated(offerId);
+        echo.createOffer(offer);
+        vm.stopPrank();
     }
 
-    // @dev Util function to generate the backend signature of the trade, returns all the data to execute the trade
-    function _prepareSignature(Trade memory trade, uint256 counterpartyPrivateKey, uint256 _signerPrivateKey)
-        internal
-        view
-        returns (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature)
-    {
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, counterpartyPrivateKey);
-        signature = Signature({v: v, r: r, s: s});
-        (vSigner, rSigner, sSigner) = _signSignature(signature, _signerPrivateKey);
+    function _createAndAcceptSingleAssetOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferAccepted(offerId);
+        echo.acceptOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
     }
 
-    // @dev Method to execute a mock trade with predefined values
-    // @dev Do not use this method if you expect a revert as the way Foundry is built, it won't catch the revert
-    function _executeMockTrade(string memory id, address creator, address counter, uint256 fees) internal {
-        Trade memory trade = Trade({
-            id: id,
-            creator: creator,
-            counterparty: counter,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-        (uint8 v, bytes32 r, bytes32 s) = _signTrade(trade, account2PrivateKey);
-        Signature memory signature = Signature({v: v, r: r, s: s});
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner) = _signSignature(signature, signerPrivateKey);
-        vm.prank(creator);
-        echo.executeTrade{value: fees}(vSigner, rSigner, sSigner, signature, trade);
+    function _createAndAcceptMultipleAssetsOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createMultipleAssetsOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account2);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferAccepted(offerId);
+        echo.acceptOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
+    }
+
+    function _executeSingleAssetOffer() internal returns (Offer memory offer) {
+        uint256 tradingFee = echo.tradingFee();
+        offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferExecuted(offerId);
+        echo.executeOffer{value: tradingFee}(offerId);
+        vm.stopPrank();
+    }
+
+    function _setFees() internal {
+        vm.prank(owner);
+        echo.setFees(0.005 ether);
+        vm.stopPrank();
+    }
+
+    function _setPaused() internal {
+        vm.prank(owner);
+        echo.setPaused(true);
+        vm.stopPrank();
+    }
+
+    function _setCreationPaused() internal {
+        vm.prank(owner);
+        echo.setCreationPaused(true);
+        vm.stopPrank();
     }
 }

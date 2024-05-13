@@ -7,7 +7,7 @@ module.exports = {
   plugins: ['prettier-plugin-solidity'],
   overrides: [
     {
-      files: ['src/**/*.sol', 'test/**/*.sol'],
+      files: ['src/**/*.sol', 'test/**/*.sol', 'script/**/*.sol'],
       options: {
         parser: 'solidity-parse',
         printWidth: 100,

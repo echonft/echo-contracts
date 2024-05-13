@@ -2,34 +2,34 @@
 pragma solidity ^0.8.18;
 
 import "solmate/auth/Owned.sol";
-
-error Paused();
-error InvalidAddress();
+import "./EchoError.sol";
 
 /// @dev Handles ownable and pausable of contract.
-/// Also manages the signer address to validate trades
 abstract contract Admin is Owned {
     bool public paused;
-    address public signer;
+    bool public creationPaused;
 
-    constructor(address owner, address _signer) Owned(owner) {
-        signer = _signer;
-    }
+    constructor(address owner) Owned(owner) {}
 
     function setPaused(bool _paused) external onlyOwner {
         paused = _paused;
     }
 
-    function setSigner(address _signer) external onlyOwner {
-        if (_signer == address(0)) revert InvalidAddress();
-        signer = _signer;
+    function setCreationPaused(bool _creationPaused) external onlyOwner {
+        creationPaused = _creationPaused;
     }
 
     modifier notPaused() {
         if (paused) {
             revert Paused();
         }
+        _;
+    }
 
+    modifier creationNotPaused() {
+        if (creationPaused) {
+            revert CreationPaused();
+        }
         _;
     }
 }

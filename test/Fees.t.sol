@@ -2,70 +2,38 @@
 pragma solidity ^0.8.18;
 
 import "./BaseTest.t.sol";
-import "./mock/Mocked721.t.sol";
 import "forge-std/Test.sol";
 
 contract FeesTest is BaseTest {
-    function testRevertsWithoutFunds() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
+    function testCannotAcceptOfferIfNotEnoughFunds() public {
+        _setFees();
+        Offer memory offer = _createSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
 
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
-
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
-            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
-        vm.prank(account1);
+        vm.prank(account2);
         vm.expectRevert(InvalidPayment.selector);
-        // 0 ether
-        echo.executeTrade(vSigner, rSigner, sSigner, signature, trade);
-
-        vm.prank(account1);
-        vm.expectRevert(InvalidPayment.selector);
-        // Not enough ether
-        echo.executeTrade{value: 0.004 ether}(vSigner, rSigner, sSigner, signature, trade);
+        echo.acceptOffer(offerId);
     }
 
-    function testSucceedsWithFunds() public {
-        // Set fees
-        vm.prank(owner);
-        echo.setFees(0.005 ether);
+    function testCannotExecuteOfferIfNotEnoughFunds() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
 
-        creator721Collections.push(apeAddress);
-        creator721Ids.push(ape1Id);
-        counterparty721Collections.push(birdAddress);
-        counterparty721Ids.push(bird1Id);
+        _setFees();
 
-        Trade memory trade = Trade({
-            id: "test",
-            creator: account1,
-            counterparty: account2,
-            expiresAt: in6hours,
-            creatorCollections: creator721Collections,
-            creatorIds: creator721Ids,
-            counterpartyCollections: counterparty721Collections,
-            counterpartyIds: counterparty721Ids
-        });
-
-        (uint8 vSigner, bytes32 rSigner, bytes32 sSigner, Signature memory signature) =
-            _prepareSignature(trade, account2PrivateKey, signerPrivateKey);
         vm.prank(account1);
-        echo.executeTrade{value: 0.005 ether}(vSigner, rSigner, sSigner, signature, trade);
-        assertEq(address(echo).balance, 0.005 ether);
-        assertEq(account1.balance, 100 ether - 0.005 ether);
+        vm.expectRevert(InvalidPayment.selector);
+        echo.executeOffer(offerId);
+    }
+
+    function testCanExecuteOfferIfEnoughFunds() public {
+        uint256 initialAccount1Balance = account1.balance;
+        uint256 initialAccount2Balance = account2.balance;
+        _setFees();
+        _executeSingleAssetOffer();
+
+        assertEq(account1.balance, initialAccount1Balance - echo.tradingFee());
+        assertEq(account2.balance, initialAccount2Balance - echo.tradingFee());
+        assertEq(address(echo).balance, echo.tradingFee() + echo.tradingFee());
     }
 }
