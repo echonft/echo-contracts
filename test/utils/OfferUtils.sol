@@ -17,7 +17,6 @@ abstract contract OfferUtils is Test {
     uint256 public in6hours;
 
     function generateOfferId(Offer memory offer) public pure returns (bytes32 offerId) {
-        // TODO Validate this behaviour
         offerId = keccak256(
             abi.encode(
                 offer.sender,

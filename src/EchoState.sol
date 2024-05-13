@@ -11,7 +11,6 @@ abstract contract EchoState {
      *  Utils
      */
     function _generateOfferId(Offer calldata offer) internal pure returns (bytes32 offerId) {
-        // TODO Validate this behaviour
         offerId = keccak256(
             abi.encode(
                 offer.sender,
@@ -49,8 +48,8 @@ abstract contract EchoState {
      * Same chain offers
      */
     // @dev Internal function to create a same chain offer
-    function _createOffer(Offer calldata offer, uint16 chainId) internal {
-        bytes32 offerId = _generateOfferId(offer);
+    function _createOffer(Offer calldata offer, uint16 chainId) internal returns (bytes32 offerId) {
+        offerId = _generateOfferId(offer);
 
         _validateOffer(offer);
 

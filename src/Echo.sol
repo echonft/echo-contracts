@@ -11,11 +11,16 @@ import "./escrow/Escrow.sol";
 import "./types/Offer.sol";
 
 contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
+    event OfferCreated(bytes32 indexed offerId);
+    event OfferAccepted(bytes32 indexed offerId);
+    event OfferCanceled(bytes32 indexed offerId);
+    event OfferExecuted(bytes32 indexed offerId);
     // @dev For future use...
-    uint16 private immutable chainId;
+
+    uint16 private immutable CHAIN_ID;
 
     constructor(address owner) Admin(owner) {
-        chainId = uint16(block.chainid);
+        CHAIN_ID = uint16(block.chainid);
     }
 
     /**
@@ -26,8 +31,10 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         if (offer.sender != msg.sender) {
             revert InvalidSender();
         }
-        _createOffer(offer, chainId);
+        bytes32 offerId = _createOffer(offer, CHAIN_ID);
         _deposit(offer.senderItems, offer.sender);
+
+        emit OfferCreated(offerId);
     }
 
     function acceptOffer(bytes32 offerId) external payable nonReentrant notPaused {
@@ -44,6 +51,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
 
         _acceptOffer(offerId, offer);
         _deposit(offer.receiverItems, offer.receiver);
+
+        emit OfferAccepted(offerId);
     }
 
     function cancelOffer(bytes32 offerId) external nonReentrant notPaused {
@@ -58,6 +67,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         _cancelOffer(offerId, offer);
         // @dev Refund sender
         _withdraw(offer.senderItems, offer.sender);
+
+        emit OfferCanceled(offerId);
     }
 
     function executeOffer(bytes32 offerId) external payable nonReentrant notPaused {
@@ -74,6 +85,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         _executeOffer(offerId, offer);
         _withdraw(offer.senderItems, offer.receiver);
         _withdraw(offer.receiverItems, offer.sender);
+
+        emit OfferExecuted(offerId);
     }
 
     // @dev Function to redeem NFTs if offer expired and trade was not executed

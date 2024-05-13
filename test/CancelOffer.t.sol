@@ -54,6 +54,8 @@ contract CancelOfferTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCanceled(offerId);
         echo.cancelOffer(offerId);
 
         (address sender,,,,,) = echo.offers(offerId);
@@ -73,6 +75,8 @@ contract CancelOfferTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCanceled(offerId);
         echo.cancelOffer(offerId);
 
         (address sender,,,,,) = echo.offers(offerId);

@@ -7,6 +7,11 @@ import "./utils/OfferUtils.sol";
 import "../src/Echo.sol";
 
 abstract contract BaseTest is Test, OfferUtils {
+    event OfferCreated(bytes32 indexed offerId);
+    event OfferAccepted(bytes32 indexed offerId);
+    event OfferCanceled(bytes32 indexed offerId);
+    event OfferExecuted(bytes32 indexed offerId);
+
     // Exclude from coverage report
     function test() public override {}
 
@@ -101,7 +106,10 @@ abstract contract BaseTest is Test, OfferUtils {
             OfferState.OPEN
         );
 
+        bytes32 offerId = generateOfferId(offer);
         vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCreated(offerId);
         echo.createOffer(offer);
         vm.stopPrank();
     }
@@ -134,7 +142,11 @@ abstract contract BaseTest is Test, OfferUtils {
             OfferState.OPEN
         );
 
+        bytes32 offerId = generateOfferId(offer);
+
         vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferCreated(offerId);
         echo.createOffer(offer);
         vm.stopPrank();
     }
@@ -145,6 +157,8 @@ abstract contract BaseTest is Test, OfferUtils {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account2);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferAccepted(offerId);
         echo.acceptOffer{value: tradingFee}(offerId);
         vm.stopPrank();
     }
@@ -155,6 +169,8 @@ abstract contract BaseTest is Test, OfferUtils {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account2);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferAccepted(offerId);
         echo.acceptOffer{value: tradingFee}(offerId);
         vm.stopPrank();
     }
@@ -165,6 +181,8 @@ abstract contract BaseTest is Test, OfferUtils {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account1);
+        vm.expectEmit(true, true, true, true, address(echo));
+        emit OfferExecuted(offerId);
         echo.executeOffer{value: tradingFee}(offerId);
         vm.stopPrank();
     }

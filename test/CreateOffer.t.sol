@@ -94,39 +94,6 @@ contract CreateOfferTest is BaseTest {
         echo.createOffer(offer);
     }
 
-    // TODO Not sure if this case if even possible since the assets are deposited on an offer creation
-    // so it's impossible to recreate the same offer ID
-    //    function testCannotCreateDuplicateOffer() public {
-    //        Offer memory firstOffer = _createMockOffer();
-    //
-    //        address[] memory senderTokenAddresses = new address[](1);
-    //        senderTokenAddresses[0] = apeAddress;
-    //        uint256[] memory senderTokenIds = new uint256[](1);
-    //        senderTokenIds[0] = ape1Id;
-    //
-    //        address[] memory receiverTokenAddresses = new address[](1);
-    //        receiverTokenAddresses[0] = birdAddress;
-    //        uint256[] memory receiverTokenIds = new uint256[](1);
-    //        receiverTokenIds[0] = bird1Id;
-    //
-    //        Offer memory secondOffer = generateOffer(
-    //            account1,
-    //            senderTokenAddresses,
-    //            senderTokenIds,
-    //            block.chainid,
-    //            account2,
-    //            receiverTokenAddresses,
-    //            receiverTokenIds,
-    //            block.chainid,
-    //            in6hours,
-    //            OfferState.OPEN
-    //        );
-    //
-    //        vm.prank(account1);
-    //        vm.expectRevert(OfferAlreadyExist.selector);
-    //        echo.createOffer(secondOffer);
-    //    }
-
     function testCanCreateOfferSingleAsset() public {
         Offer memory offer = _createSingleAssetOffer();
 
