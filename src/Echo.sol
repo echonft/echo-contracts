@@ -21,7 +21,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
     /**
      * Same chain offers
      */
-    function createOffer(Offer calldata offer) external nonReentrant notPaused {
+    function createOffer(Offer calldata offer) external nonReentrant notPaused creationNotPaused {
         // @dev Cannot accept an offer if not the receiver
         if (offer.sender != msg.sender) {
             revert InvalidSender();

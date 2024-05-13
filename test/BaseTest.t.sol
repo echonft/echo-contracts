@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
+import "./mock/Mocked721.sol";
 import "./utils/OfferUtils.sol";
 import "../src/Echo.sol";
 
@@ -178,6 +178,12 @@ abstract contract BaseTest is Test, OfferUtils {
     function _setPaused() internal {
         vm.prank(owner);
         echo.setPaused(true);
+        vm.stopPrank();
+    }
+
+    function _setCreationPaused() internal {
+        vm.prank(owner);
+        echo.setCreationPaused(true);
         vm.stopPrank();
     }
 }

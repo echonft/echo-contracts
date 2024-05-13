@@ -10,8 +10,7 @@ contract AdminTest is BaseTest {
         vm.expectRevert("UNAUTHORIZED");
         echo.setPaused(true);
 
-        vm.expectRevert("UNAUTHORIZED");
-        echo.setPaused(false);
+        assertEq(echo.paused(), false);
     }
 
     function testCanPauseIfOwner() public {
@@ -22,5 +21,23 @@ contract AdminTest is BaseTest {
         vm.prank(owner);
         echo.setPaused(false);
         assertEq(echo.paused(), false);
+    }
+
+    function testCannotPauseCreationIfNotOwner() public {
+        vm.prank(account1);
+        vm.expectRevert("UNAUTHORIZED");
+        echo.setCreationPaused(true);
+
+        assertEq(echo.creationPaused(), false);
+    }
+
+    function testCanPauseCreationIfOwner() public {
+        vm.prank(owner);
+        echo.setCreationPaused(true);
+        assertEq(echo.creationPaused(), true);
+
+        vm.prank(owner);
+        echo.setCreationPaused(false);
+        assertEq(echo.creationPaused(), false);
     }
 }

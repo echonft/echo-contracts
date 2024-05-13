@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+error CreationPaused();
 error InvalidAssets();
 error InvalidOfferState();
 error InvalidPayment();
@@ -11,3 +12,5 @@ error OfferAlreadyExist();
 error OfferDoesNotExist();
 error OfferHasExpired();
 error OfferHasNotExpired();
+error Paused();
+error WithdrawFailed();

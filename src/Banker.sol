@@ -2,8 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "solmate/auth/Owned.sol";
-
-error WithdrawFailed();
+import "./EchoError.sol";
 
 abstract contract Banker is Owned {
     uint256 public tradingFee = 0 ether;
