@@ -12,7 +12,7 @@ import "./types/Offer.sol";
 
 contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
     // @dev For future use...
-    uint16 private chainId;
+    uint16 private immutable chainId;
 
     constructor(address owner) Admin(owner) {
         chainId = uint16(block.chainid);
