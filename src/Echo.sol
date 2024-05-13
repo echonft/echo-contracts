@@ -26,8 +26,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         if (offer.sender != msg.sender) {
             revert InvalidSender();
         }
-        _deposit(offer.senderItems, offer.sender);
         _createOffer(offer, chainId);
+        _deposit(offer.senderItems, offer.sender);
     }
 
     function acceptOffer(bytes32 offerId) external payable nonReentrant notPaused {
@@ -42,8 +42,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidReceiver();
         }
 
-        _deposit(offer.receiverItems, offer.receiver);
         _acceptOffer(offerId, offer);
+        _deposit(offer.receiverItems, offer.receiver);
     }
 
     function cancelOffer(bytes32 offerId) external nonReentrant notPaused {
@@ -55,9 +55,9 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidSender();
         }
 
+        _cancelOffer(offerId, offer);
         // @dev Refund sender
         _withdraw(offer.senderItems, offer.sender);
-        _cancelOffer(offerId, offer);
     }
 
     function executeOffer(bytes32 offerId) external payable nonReentrant notPaused {
@@ -71,9 +71,9 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         if (offer.sender != msg.sender) {
             revert InvalidSender();
         }
+        _executeOffer(offerId, offer);
         _withdraw(offer.senderItems, offer.receiver);
         _withdraw(offer.receiverItems, offer.sender);
-        _executeOffer(offerId, offer);
     }
 
     // @dev Function to redeem NFTs if offer expired and trade was not executed
@@ -91,8 +91,6 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
 
         // @dev If sender, we need extra checks to make sure receiver also redeemed if offer was accepted
         if (msg.sender == offer.sender) {
-            _withdraw(offer.senderItems, offer.sender);
-
             // @dev Receiver has escrowed only if offer was accepted
             if (offer.state == OfferState.ACCEPTED) {
                 OfferItem memory receiverFirstOfferItem = offer.receiverItems.items[0];
@@ -105,8 +103,8 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             } else {
                 delete offers[offerId];
             }
+            _withdraw(offer.senderItems, offer.sender);
         } else {
-            _withdraw(offer.receiverItems, offer.receiver);
             // @dev We need to check if sender has redeemed too
             OfferItem memory senderFirstOfferItem = offer.senderItems.items[0];
             ERC721 senderFirstNft = ERC721(senderFirstOfferItem.tokenAddress);
@@ -114,6 +112,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             if (senderFirstNft.ownerOf(senderFirstOfferItem.tokenId) != address(this)) {
                 delete offers[offerId];
             }
+            _withdraw(offer.receiverItems, offer.receiver);
         }
     }
 }
