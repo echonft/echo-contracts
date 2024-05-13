@@ -39,7 +39,7 @@ contract OwnershipTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account3);
-        vm.expectRevert(InvalidReceiver.selector);
+        vm.expectRevert(InvalidSender.selector);
         echo.cancelOffer(offerId);
     }
 

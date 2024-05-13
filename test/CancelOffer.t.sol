@@ -32,7 +32,20 @@ contract CancelOfferTest is BaseTest {
         bytes32 offerId = generateOfferId(invalidOffer);
 
         vm.prank(account1);
-        vm.expectRevert(InvalidReceiver.selector);
+        vm.expectRevert(InvalidSender.selector);
+        echo.cancelOffer(offerId);
+    }
+
+    function testCannotCancelAcceptedOffer() public {
+        Offer memory offer = _createAndAcceptSingleAssetOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidOfferState.selector);
+        echo.cancelOffer(offerId);
+
+        vm.prank(account2);
+        vm.expectRevert(InvalidSender.selector);
         echo.cancelOffer(offerId);
     }
 

@@ -26,10 +26,11 @@ abstract contract EchoState {
     }
 
     // @dev Internal function to check that offer data is valid for creation
-    function _validateOffer(bytes32 offerId, Offer calldata offer) internal view offerNotExpired(offer.expiration) {
-        if (offers[offerId].sender != address(0)) {
-            revert OfferAlreadyExist();
-        }
+    function _validateOffer(Offer calldata offer) internal view offerNotExpired(offer.expiration) {
+        // @dev For future use...
+        //        if (offers[offerId].sender != address(0)) {
+        //            revert OfferAlreadyExist();
+        //        }
 
         if (offer.state != OfferState.OPEN) {
             revert InvalidOfferState();
@@ -51,7 +52,7 @@ abstract contract EchoState {
     function _createOffer(Offer calldata offer, uint16 chainId) internal {
         bytes32 offerId = _generateOfferId(offer);
 
-        _validateOffer(offerId, offer);
+        _validateOffer(offer);
 
         // @dev Chain must be the same as contract for same chain offers
         if (offer.senderItems.chainId != chainId) {
@@ -68,9 +69,10 @@ abstract contract EchoState {
 
     function _acceptOffer(bytes32 offerId, Offer memory offer) internal offerNotExpired(offer.expiration) {
         // @dev Cannot accept an offer if it's not OPEN
-        if (offer.state != OfferState.OPEN) {
-            revert InvalidOfferState();
-        }
+        // @dev For future use..
+        //        if (offer.state != OfferState.OPEN) {
+        //            revert InvalidOfferState();
+        //        }
         offers[offerId].state = OfferState.ACCEPTED;
     }
 

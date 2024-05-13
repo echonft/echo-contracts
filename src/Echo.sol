@@ -52,7 +52,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         // @dev We dont do a check on whether the offer exsits or not because
         // if it doesn't exist offer.sender = address(0) which can't be msg.sender
         if (offer.sender != msg.sender) {
-            revert InvalidReceiver();
+            revert InvalidSender();
         }
 
         // @dev Refund sender

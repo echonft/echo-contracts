@@ -36,6 +36,64 @@ contract CreateOfferTest is BaseTest {
         echo.createOffer(offer);
     }
 
+    function testCannotCreateOfferIfSenderItemsNotOnProperChain() public {
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
+
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        Offer memory offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            10,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            block.chainid,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidAssets.selector);
+        echo.createOffer(offer);
+    }
+
+    function testCannotCreateOfferIfReceiverItemsNotOnProperChain() public {
+        address[] memory senderTokenAddresses = new address[](1);
+        senderTokenAddresses[0] = apeAddress;
+        uint256[] memory senderTokenIds = new uint256[](1);
+        senderTokenIds[0] = ape1Id;
+
+        address[] memory receiverTokenAddresses = new address[](1);
+        receiverTokenAddresses[0] = birdAddress;
+        uint256[] memory receiverTokenIds = new uint256[](1);
+        receiverTokenIds[0] = bird1Id;
+
+        Offer memory offer = generateOffer(
+            account1,
+            senderTokenAddresses,
+            senderTokenIds,
+            block.chainid,
+            account2,
+            receiverTokenAddresses,
+            receiverTokenIds,
+            10,
+            in6hours,
+            OfferState.OPEN
+        );
+
+        vm.prank(account1);
+        vm.expectRevert(InvalidAssets.selector);
+        echo.createOffer(offer);
+    }
+
     // TODO Not sure if this case if even possible since the assets are deposited on an offer creation
     // so it's impossible to recreate the same offer ID
     //    function testCannotCreateDuplicateOffer() public {
