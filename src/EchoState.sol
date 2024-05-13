@@ -86,9 +86,10 @@ abstract contract EchoState {
 
     function _executeOffer(bytes32 offerId, Offer memory offer) internal offerNotExpired(offer.expiration) {
         // @dev Cannot execute an offer if it's not ACCEPTED
-        if (offer.state != OfferState.ACCEPTED) {
-            revert InvalidOfferState();
-        }
+        // @dev For future use..
+        //        if (offer.state != OfferState.ACCEPTED) {
+        //            revert InvalidOfferState();
+        //        }
 
         delete offers[offerId];
     }
