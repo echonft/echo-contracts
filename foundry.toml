@@ -17,3 +17,10 @@ fuzz_runs = 1000
 verbosity = 4
 
 gas_reports = ["Echo"]
+
+# Config
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
