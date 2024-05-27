@@ -15,6 +15,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
     event OfferAccepted(bytes32 indexed offerId);
     event OfferCanceled(bytes32 indexed offerId);
     event OfferExecuted(bytes32 indexed offerId);
+    event OfferRedeeemed(bytes32 indexed offerId, address indexed owner);
 
     // @dev For future use...
     uint256 private immutable CHAIN_ID;
@@ -127,5 +128,6 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             }
             _withdraw(offer.receiverItems, offer.receiver);
         }
+        emit OfferRedeeemed(offerId, msg.sender);
     }
 }
