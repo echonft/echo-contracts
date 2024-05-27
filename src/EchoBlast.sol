@@ -2,8 +2,8 @@
 pragma solidity ^0.8.18;
 
 import "./Echo.sol";
-import "blast/IBlast.sol";
-import "blast/IBlastPoints.sol";
+import "../lib/blast/IBlast.sol";
+import "../lib/blast/IBlastPoints.sol";
 
 contract EchoBlast is Echo {
     IBlast public constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
