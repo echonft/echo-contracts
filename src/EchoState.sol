@@ -48,7 +48,7 @@ abstract contract EchoState {
      * Same chain offers
      */
     // @dev Internal function to create a same chain offer
-    function _createOffer(Offer calldata offer, uint16 chainId) internal returns (bytes32 offerId) {
+    function _createOffer(Offer calldata offer, uint256 chainId) internal returns (bytes32 offerId) {
         offerId = _generateOfferId(offer);
 
         _validateOffer(offer);
