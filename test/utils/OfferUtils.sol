@@ -42,6 +42,8 @@ abstract contract OfferUtils is Test {
         uint256 expiration,
         OfferState state
     ) public returns (Offer memory offer) {
+        delete senderItems;
+        delete receiverItems;
         require(senderTokenAddresses.length == senderTokenIds.length, "Sender items arrays do not match");
 
         require(receiverTokenAddresses.length == receiverTokenIds.length, "Receiver items arrays do not match");

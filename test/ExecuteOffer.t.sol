@@ -41,7 +41,7 @@ contract ExecuteOfferTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account1);
-        vm.expectRevert("WRONG_FROM");
+        vm.expectRevert(InvalidOfferState.selector);
         echo.executeOffer(offerId);
     }
 
