@@ -78,7 +78,7 @@ contract ExpirationTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account2);
-        vm.expectRevert(OfferHasNotExpired.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 

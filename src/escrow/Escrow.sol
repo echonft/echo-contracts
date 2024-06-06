@@ -15,4 +15,17 @@ abstract contract Escrow is EscrowHandler, EscrowState {
         _transferOfferItems(offerItems, address(this), to);
         _removeFromEscrow(_generateEscrowId(offerId, to));
     }
+
+    function _swap(
+        OfferItems memory senderItems,
+        address sender,
+        OfferItems memory receiverItems,
+        address receiver,
+        bytes32 offerId
+    ) internal {
+        _transferOfferItems(senderItems, address(this), receiver);
+        _transferOfferItems(receiverItems, address(this), sender);
+        _removeFromEscrow(_generateEscrowId(offerId, sender));
+        _removeFromEscrow(_generateEscrowId(offerId, receiver));
+    }
 }

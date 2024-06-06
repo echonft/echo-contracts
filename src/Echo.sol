@@ -33,7 +33,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidSender();
         }
         bytes32 offerId = _createOffer(offer, CHAIN_ID);
-        _deposit(offer.senderItems, offerId, offer.sender);
+        _deposit(offer.senderItems, offerId, msg.sender);
 
         emit OfferCreated(offerId);
     }
@@ -50,7 +50,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidReceiver();
         }
         _acceptOffer(offerId, offer);
-        _deposit(offer.receiverItems, offerId, offer.receiver);
+        _deposit(offer.receiverItems, offerId, msg.sender);
 
         emit OfferAccepted(offerId);
     }
@@ -88,8 +88,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidSender();
         }
         _executeOffer(offerId, offer);
-        _withdraw(offer.receiverItems, offerId, offer.receiver);
-        _withdraw(offer.senderItems, offerId, offer.sender);
+        _swap(offer.senderItems, offer.sender, offer.receiverItems, offer.receiver, offerId);
 
         emit OfferExecuted(offerId);
     }

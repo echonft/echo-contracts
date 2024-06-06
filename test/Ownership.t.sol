@@ -39,7 +39,7 @@ contract OwnershipTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account3);
-        vm.expectRevert(InvalidSender.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.cancelOffer(offerId);
     }
 
@@ -66,7 +66,7 @@ contract OwnershipTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account3);
-        vm.expectRevert(InvalidRecipient.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 
@@ -75,7 +75,7 @@ contract OwnershipTest is BaseTest {
         bytes32 offerId = generateOfferId(offer);
 
         vm.prank(account3);
-        vm.expectRevert(InvalidRecipient.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 }

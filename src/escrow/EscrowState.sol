@@ -26,12 +26,12 @@ abstract contract EscrowState {
         delete _escrowedItems[escrowId];
     }
 
-    function _isInEscrow(bytes32 escrowId) internal returns (bool inEscrow) {
-        inEscrow = _escrowedItems[escrowId];
+    function _isInEscrow(bytes32 escrowId) internal view returns (bool) {
+        return _escrowedItems[escrowId];
     }
 
     modifier isInEscrow(bytes32 escrowId) {
-        if (_isInEscrow(escrowId)) {
+        if (!_isInEscrow(escrowId)) {
             revert ItemsOutOfEscrow();
         }
         _;

@@ -27,7 +27,7 @@ contract RedeemOfferTest is BaseTest {
         assertEq(sender, address(0));
 
         vm.prank(account1);
-        vm.expectRevert(InvalidRecipient.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 
@@ -52,7 +52,7 @@ contract RedeemOfferTest is BaseTest {
 
         vm.prank(account1);
         // @dev withdraw fails
-        vm.expectRevert("WRONG_FROM");
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 
@@ -77,7 +77,7 @@ contract RedeemOfferTest is BaseTest {
 
         vm.prank(account2);
         // @dev withdraw fails
-        vm.expectRevert("WRONG_FROM");
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.redeemOffer(offerId);
     }
 

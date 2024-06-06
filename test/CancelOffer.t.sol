@@ -32,7 +32,7 @@ contract CancelOfferTest is BaseTest {
         bytes32 offerId = generateOfferId(invalidOffer);
 
         vm.prank(account1);
-        vm.expectRevert(InvalidSender.selector);
+        vm.expectRevert(ItemsOutOfEscrow.selector);
         echo.cancelOffer(offerId);
     }
 
