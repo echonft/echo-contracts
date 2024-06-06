@@ -33,7 +33,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidSender();
         }
         bytes32 offerId = _createOffer(offer, CHAIN_ID);
-        _deposit(offer.senderItems, offer.sender);
+        _deposit(offer.senderItems, offerId, offer.sender);
 
         emit OfferCreated(offerId);
     }
@@ -49,14 +49,18 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         if (offer.receiver != msg.sender) {
             revert InvalidReceiver();
         }
-
         _acceptOffer(offerId, offer);
-        _deposit(offer.receiverItems, offer.receiver);
+        _deposit(offer.receiverItems, offerId, offer.receiver);
 
         emit OfferAccepted(offerId);
     }
 
-    function cancelOffer(bytes32 offerId) external nonReentrant notPaused {
+    function cancelOffer(bytes32 offerId)
+        external
+        nonReentrant
+        notPaused
+        isInEscrow(_generateEscrowId(offerId, msg.sender))
+    {
         Offer memory offer = offers[offerId];
 
         // @dev We dont do a check on whether the offer exsits or not because
@@ -67,7 +71,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
 
         _cancelOffer(offerId, offer);
         // @dev Refund sender
-        _withdraw(offer.senderItems, offer.sender);
+        _withdraw(offer.senderItems, offerId, msg.sender);
 
         emit OfferCanceled(offerId);
     }
@@ -84,14 +88,19 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert InvalidSender();
         }
         _executeOffer(offerId, offer);
-        _withdraw(offer.senderItems, offer.receiver);
-        _withdraw(offer.receiverItems, offer.sender);
+        _withdraw(offer.receiverItems, offerId, offer.receiver);
+        _withdraw(offer.senderItems, offerId, offer.sender);
 
         emit OfferExecuted(offerId);
     }
 
     // @dev Function to redeem NFTs if offer expired and trade was not executed
-    function redeemOffer(bytes32 offerId) external nonReentrant notPaused {
+    function redeemOffer(bytes32 offerId)
+        external
+        nonReentrant
+        notPaused
+        isInEscrow(_generateEscrowId(offerId, msg.sender))
+    {
         Offer memory offer = offers[offerId];
 
         // @dev no need to check for existence of offer because if deleted, the offer data points to 0
@@ -103,30 +112,17 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert OfferHasNotExpired();
         }
 
-        // @dev If sender, we need extra checks to make sure receiver also redeemed if offer was accepted
+        // @dev We check the escrow status of the counterparty and delete the offer if nothing is in escrow anymore
         if (msg.sender == offer.sender) {
-            // @dev Receiver has escrowed only if offer was accepted
-            if (offer.state == OfferState.ACCEPTED) {
-                OfferItem memory receiverFirstOfferItem = offer.receiverItems.items[0];
-                ERC721 receiverFirstNft = ERC721(receiverFirstOfferItem.tokenAddress);
-                // @dev if Echo is not the owner, it means receiver has redeemed
-                if (receiverFirstNft.ownerOf(receiverFirstOfferItem.tokenId) != address(this)) {
-                    delete offers[offerId];
-                }
-                // @dev If offer was OPEN, receiver has not escrowed, we can safely delete
-            } else {
+            _withdraw(offer.senderItems, offerId, msg.sender);
+            if (!_isInEscrow(_generateEscrowId(offerId, offer.receiver))) {
                 delete offers[offerId];
             }
-            _withdraw(offer.senderItems, offer.sender);
-        } else {
-            // @dev We need to check if sender has redeemed too
-            OfferItem memory senderFirstOfferItem = offer.senderItems.items[0];
-            ERC721 senderFirstNft = ERC721(senderFirstOfferItem.tokenAddress);
-            // @dev if Echo is not the owner, it means sender has redeemed
-            if (senderFirstNft.ownerOf(senderFirstOfferItem.tokenId) != address(this)) {
+        } else if (msg.sender == offer.receiver) {
+            _withdraw(offer.receiverItems, offerId, msg.sender);
+            if (!_isInEscrow(_generateEscrowId(offerId, offer.sender))) {
                 delete offers[offerId];
             }
-            _withdraw(offer.receiverItems, offer.receiver);
         }
         emit OfferRedeeemed(offerId, msg.sender);
     }

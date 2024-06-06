@@ -8,6 +8,8 @@ error InvalidPayment();
 error InvalidReceiver();
 error InvalidSender();
 error InvalidRecipient();
+error ItemsAlreadyEscrowed();
+error ItemsOutOfEscrow();
 //error OfferAlreadyExist();
 error OfferHasExpired();
 error OfferHasNotExpired();
