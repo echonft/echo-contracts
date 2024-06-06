@@ -102,11 +102,6 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
     {
         Offer memory offer = offers[offerId];
 
-        // @dev no need to check for existence of offer because if deleted, the offer data points to 0
-        if (msg.sender != offer.sender && msg.sender != offer.receiver) {
-            revert InvalidRecipient();
-        }
-
         if (offer.expiration > block.timestamp) {
             revert OfferHasNotExpired();
         }

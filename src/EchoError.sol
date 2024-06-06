@@ -7,7 +7,6 @@ error InvalidOfferState();
 error InvalidPayment();
 error InvalidReceiver();
 error InvalidSender();
-error InvalidRecipient();
 error ItemsAlreadyEscrowed();
 error ItemsOutOfEscrow();
 //error OfferAlreadyExist();
