@@ -45,7 +45,7 @@ abstract contract BaseTest is Test, OfferUtils {
     uint256 public bird2Id;
     uint256 public bird3Id;
 
-    function setUp() public {
+    function setUp() public virtual {
         // Generate account2 and signer from private key.
         account2 = vm.addr(account2PrivateKey);
         signer = vm.addr(signerPrivateKey);
