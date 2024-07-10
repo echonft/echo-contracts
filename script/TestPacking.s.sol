@@ -8,9 +8,9 @@ contract TestPacking is Script {
     // Exclude from coverage report
     function test() public {}
 
-    function run() external {
+    function run() external view {
         OfferItem[] memory offerItems = new OfferItem[](1);
-        offerItems[0] = OfferItem({tokenAddress: 0x7DA16cd402106Adaf39092215DbB54092b80B6E6, tokenId: 2});
+        offerItems[0] = OfferItem({tokenAddress: 0x7DA16cd402106Adaf39092215DbB54092b80B6E6, tokenId: 2, amount: 0});
 
         Offer memory offer = Offer({
             sender: 0x7DA16cd402106Adaf39092215DbB54092b80B6E6,
