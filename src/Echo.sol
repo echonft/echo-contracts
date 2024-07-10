@@ -44,7 +44,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         }
         Offer memory offer = offers[offerId];
 
-        // @dev We dont do a check on whether the offer exsits or not because
+        // @dev We dont do a check on whether the offer exists or not because
         // if it doesn't exist offer.receiver = address(0) which can't be msg.sender
         if (offer.receiver != msg.sender) {
             revert InvalidReceiver();

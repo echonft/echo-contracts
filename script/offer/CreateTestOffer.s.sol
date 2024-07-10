@@ -31,20 +31,12 @@ contract CreateTestOffer is Script, OfferUtils {
         uint256[] memory receiverTokenAmounts = new uint256[](1);
         receiverTokenAmounts[0] = 0;
 
-        Offer memory offer = generateOffer(
-            sender,
-            senderTokenAddresses,
-            senderTokenIds,
-            senderTokenAmounts,
-            block.chainid,
-            receiver,
-            receiverTokenAddresses,
-            receiverTokenIds,
-            receiverTokenAmounts,
-            block.chainid,
-            expiration,
-            OfferState.OPEN
-        );
+        OfferItems memory senderItems =
+            generateOfferItems(senderTokenAddresses, senderTokenIds, senderTokenAmounts, block.chainid);
+        OfferItems memory receiverItems =
+            generateOfferItems(receiverTokenAddresses, receiverTokenIds, receiverTokenAmounts, block.chainid);
+
+        Offer memory offer = generateOffer(sender, senderItems, receiver, receiverItems, expiration, OfferState.OPEN);
         echo.createOffer(offer);
 
         vm.stopBroadcast();

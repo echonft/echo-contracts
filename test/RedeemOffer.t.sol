@@ -200,4 +200,34 @@ contract RedeemOfferTest is BaseTest {
         // @dev When the offer is redeemed, it's also deleted
         assertEq(sender, address(0));
     }
+
+    function testCanFullyRedeemExpiredAcceptedOfferMultiToken() public {
+        Offer memory offer = _createAndAcceptMultiTokensOffer();
+        bytes32 offerId = generateOfferId(offer);
+
+        // validate that the receiver items are escrowed
+        assertOfferItemsOwnership(offer.receiverItems.items, address(echo));
+        // validate that the sender items are escrowed
+        assertOfferItemsOwnership(offer.senderItems.items, address(echo));
+
+        vm.warp(in6hours);
+
+        vm.prank(account2);
+        echo.redeemOffer(offerId);
+        // validate that the receiver items are redemeed
+        assertOfferItemsOwnership(offer.receiverItems.items, offer.receiver);
+        (, address receiver,,,,) = echo.offers(offerId);
+
+        // @dev Offer is still existing because sender has not redeemed
+        assertEq(receiver, offer.receiver);
+
+        vm.prank(account1);
+        echo.redeemOffer(offerId);
+        // validate that the receiver items are redemeed
+        assertOfferItemsOwnership(offer.senderItems.items, offer.sender);
+
+        (address sender,,,,,) = echo.offers(offerId);
+        // @dev Offer does not exist
+        assertEq(sender, address(0));
+    }
 }

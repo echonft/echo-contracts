@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
+import "solady/src/tokens/ERC20.sol";
 import "../mock/Mocked721.sol";
 import "../../src/types/Offer.sol";
 import "../../src/types/OfferItem.sol";
@@ -11,9 +12,7 @@ abstract contract OfferUtils is Test {
     // Exclude from coverage report
     function test() public virtual {}
 
-    OfferItem[] public senderItems;
-    OfferItem[] public receiverItems;
-
+    OfferItem[] private items;
     uint256 public in6hours;
 
     function generateOfferId(Offer memory offer) public pure returns (bytes32 offerId) {
@@ -30,44 +29,49 @@ abstract contract OfferUtils is Test {
         );
     }
 
+    function generateOfferItems(
+        address[] memory tokenAddresses,
+        uint256[] memory tokenIds,
+        uint256[] memory tokenAmounts,
+        uint256 chainId
+    ) public returns (OfferItems memory offerItems) {
+        require(tokenAddresses.length == tokenIds.length, "Items arrays do not match");
+        require(tokenAddresses.length == tokenAmounts.length, "Items arrays do not match");
+        delete items;
+        for (uint256 i = 0; i < tokenAddresses.length; i++) {
+            items.push(OfferItem({tokenAddress: tokenAddresses[i], tokenId: tokenIds[i], amount: tokenAmounts[i]}));
+        }
+        offerItems = OfferItems({chainId: chainId, items: items});
+    }
+
     function generateOffer(
         address sender,
-        address[] memory senderTokenAddresses,
-        uint256[] memory senderTokenIds,
-        uint256 senderChainId,
+        OfferItems memory senderItems,
         address receiver,
-        address[] memory receiverTokenAddresses,
-        uint256[] memory receiverTokenIds,
-        uint256 receiverChainId,
+        OfferItems memory receiverItems,
         uint256 expiration,
         OfferState state
-    ) public returns (Offer memory offer) {
-        require(senderTokenAddresses.length == senderTokenIds.length, "Sender items arrays do not match");
-
-        require(receiverTokenAddresses.length == receiverTokenIds.length, "Receiver items arrays do not match");
-
-        for (uint256 i = 0; i < senderTokenAddresses.length; i++) {
-            senderItems.push(OfferItem({tokenAddress: senderTokenAddresses[i], tokenId: senderTokenIds[i]}));
-        }
-
-        for (uint256 i = 0; i < receiverTokenAddresses.length; i++) {
-            receiverItems.push(OfferItem({tokenAddress: receiverTokenAddresses[i], tokenId: receiverTokenIds[i]}));
-        }
-
+    ) public pure returns (Offer memory offer) {
         offer = Offer({
             sender: sender,
             receiver: receiver,
-            senderItems: OfferItems({chainId: senderChainId, items: senderItems}),
-            receiverItems: OfferItems({chainId: receiverChainId, items: receiverItems}),
+            senderItems: senderItems,
+            receiverItems: receiverItems,
             expiration: expiration,
             state: state
         });
     }
 
-    function assertOfferItemsOwnership(OfferItem[] memory items, address owner) public {
-        for (uint256 i = 0; i < items.length; i++) {
-            Mocked721 tokenContract = Mocked721(items[i].tokenAddress);
-            assertEq(tokenContract.ownerOf(items[i].tokenId), owner);
+    function assertOfferItemsOwnership(OfferItem[] memory _items, address owner) public {
+        for (uint256 i = 0; i < _items.length; i++) {
+            OfferItem memory item = _items[i];
+            if (item.amount >= 1) {
+                ERC20 tokenContract = ERC20(item.tokenAddress);
+                assertEq(tokenContract.balanceOf(owner), item.amount);
+            } else {
+                Mocked721 tokenContract = Mocked721(item.tokenAddress);
+                assertEq(tokenContract.ownerOf(item.tokenId), owner);
+            }
         }
     }
 
@@ -77,6 +81,7 @@ abstract contract OfferUtils is Test {
         for (uint256 i = 0; i < items1.items.length; i++) {
             assertEq(items1.items[i].tokenAddress, items2.items[i].tokenAddress);
             assertEq(items1.items[i].tokenId, items2.items[i].tokenId);
+            assertEq(items1.items[i].amount, items2.items[i].amount);
         }
     }
 
