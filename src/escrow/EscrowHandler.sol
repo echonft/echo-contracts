@@ -2,8 +2,8 @@
 pragma solidity ^0.8.18;
 
 import "solmate/tokens/ERC721.sol";
-import "solady/src/tokens/ERC20.sol";
 import "../types/OfferItems.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 
 abstract contract EscrowHandler is ERC721TokenReceiver {
     function _transferERC721(address collectionAddress, uint256 id, address from, address to) internal {
@@ -12,11 +12,10 @@ abstract contract EscrowHandler is ERC721TokenReceiver {
     }
 
     function _transferERC20(address tokenAddress, uint256 amount, address from, address to) internal {
-        ERC20 token = ERC20(tokenAddress);
         if (address(this) == from) {
-            token.transfer(to, amount);
+            SafeTransferLib.safeTransfer(tokenAddress, to, amount);
         } else {
-            token.transferFrom(from, to, amount);
+            SafeTransferLib.safeTransferFrom(tokenAddress, from, to, amount);
         }
     }
 

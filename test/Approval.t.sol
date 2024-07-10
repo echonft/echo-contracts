@@ -6,7 +6,7 @@ import "./mock/Mocked721.sol";
 import "forge-std/Test.sol";
 
 contract ApprovalTest is BaseTest {
-    error InsufficientAllowance();
+    error TransferFromFailed();
 
     function testCannotExecuteTradeIfSenderDidNotApprove() public {
         address[] memory senderTokenAddresses = new address[](1);
@@ -59,7 +59,7 @@ contract ApprovalTest is BaseTest {
 
         vm.startPrank(account1);
         weth.approve(address(echo), 9 ether);
-        vm.expectRevert(InsufficientAllowance.selector);
+        vm.expectRevert(TransferFromFailed.selector);
         echo.createOffer(offer);
     }
 
@@ -141,13 +141,13 @@ contract ApprovalTest is BaseTest {
         vm.prank(account2);
         usdt.approve(address(echo), 0);
         vm.prank(account2);
-        vm.expectRevert(InsufficientAllowance.selector);
+        vm.expectRevert(TransferFromFailed.selector);
         echo.acceptOffer(offerId);
 
         vm.prank(account2);
         usdt.approve(address(echo), 9000);
         vm.prank(account2);
-        vm.expectRevert(InsufficientAllowance.selector);
+        vm.expectRevert(TransferFromFailed.selector);
         echo.acceptOffer(offerId);
     }
 }
