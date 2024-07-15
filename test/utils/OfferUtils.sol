@@ -29,6 +29,7 @@ abstract contract OfferUtils is Test {
         );
     }
 
+    // TODO Should receive an array of types
     function generateOfferItems(
         address[] memory tokenAddresses,
         uint256[] memory tokenIds,
@@ -39,7 +40,23 @@ abstract contract OfferUtils is Test {
         require(tokenAddresses.length == tokenAmounts.length, "Items arrays do not match");
         delete items;
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
-            items.push(OfferItem({tokenAddress: tokenAddresses[i], tokenId: tokenIds[i], amount: tokenAmounts[i]}));
+            if (tokenAmounts[i] > 0) {
+                items.push(
+                    OfferItem({
+                        tokenAddress: tokenAddresses[i],
+                        tokenIdOrAmount: tokenAmounts[i],
+                        tokenType: TokenType.ERC20
+                    })
+                );
+            } else {
+                items.push(
+                    OfferItem({
+                        tokenAddress: tokenAddresses[i],
+                        tokenIdOrAmount: tokenIds[i],
+                        tokenType: TokenType.ERC721
+                    })
+                );
+            }
         }
         offerItems = OfferItems({chainId: chainId, items: items});
     }
@@ -65,12 +82,12 @@ abstract contract OfferUtils is Test {
     function assertOfferItemsOwnership(OfferItem[] memory _items, address owner) public {
         for (uint256 i = 0; i < _items.length; i++) {
             OfferItem memory item = _items[i];
-            if (item.amount >= 1) {
+            if (item.tokenType == TokenType.ERC20) {
                 ERC20 tokenContract = ERC20(item.tokenAddress);
-                assertEq(tokenContract.balanceOf(owner), item.amount);
+                assertEq(tokenContract.balanceOf(owner), item.tokenIdOrAmount);
             } else {
                 Mocked721 tokenContract = Mocked721(item.tokenAddress);
-                assertEq(tokenContract.ownerOf(item.tokenId), owner);
+                assertEq(tokenContract.ownerOf(item.tokenIdOrAmount), owner);
             }
         }
     }
@@ -80,8 +97,10 @@ abstract contract OfferUtils is Test {
         assertEq(items1.chainId, items2.chainId);
         for (uint256 i = 0; i < items1.items.length; i++) {
             assertEq(items1.items[i].tokenAddress, items2.items[i].tokenAddress);
-            assertEq(items1.items[i].tokenId, items2.items[i].tokenId);
-            assertEq(items1.items[i].amount, items2.items[i].amount);
+            assertEq(items1.items[i].tokenIdOrAmount, items2.items[i].tokenIdOrAmount);
+            if (items1.items[i].tokenType != items2.items[i].tokenType) {
+                assertTrue(false);
+            }
         }
     }
 

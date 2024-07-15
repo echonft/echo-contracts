@@ -5,7 +5,8 @@ import "./OfferItems.sol";
 
 enum OfferState {
     OPEN,
-    ACCEPTED
+    ACCEPTED,
+    PARTLY_REDEEMED
 }
 
 // @dev Struct representing an on-chain offer

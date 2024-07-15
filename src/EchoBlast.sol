@@ -14,7 +14,7 @@ contract EchoBlast is Echo {
         BLAST.configureClaimableGas();
     }
 
-    function claimGas() external onlyOwner {
-        BLAST.claimMaxGas(address(this), msg.sender);
+    function claimGas() external onlyOwner returns (uint256) {
+        return BLAST.claimMaxGas(address(this), msg.sender);
     }
 }
