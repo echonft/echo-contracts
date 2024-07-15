@@ -44,7 +44,7 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
         }
         Offer memory offer = offers[offerId];
 
-        // @dev We dont do a check on whether the offer exsits or not because
+        // @dev We dont do a check on whether the offer exists or not because
         // if it doesn't exist offer.receiver = address(0) which can't be msg.sender
         if (offer.receiver != msg.sender) {
             revert InvalidReceiver();
@@ -103,29 +103,17 @@ contract Echo is ReentrancyGuard, Admin, Banker, Escrow, EchoState {
             revert OfferHasNotExpired();
         }
 
+        // @dev Receiver has escrowed only if offer was PARTLY_REDEEMED
+        if (offer.state == OfferState.ACCEPTED) {
+            offers[offerId].state = OfferState.PARTLY_REDEEMED;
+        } else {
+            delete offers[offerId];
+        }
+
         // @dev If sender, we need extra checks to make sure receiver also redeemed if offer was accepted
         if (msg.sender == offer.sender) {
-            // @dev Receiver has escrowed only if offer was accepted
-            if (offer.state == OfferState.ACCEPTED) {
-                OfferItem memory receiverFirstOfferItem = offer.receiverItems.items[0];
-                ERC721 receiverFirstNft = ERC721(receiverFirstOfferItem.tokenAddress);
-                // @dev if Echo is not the owner, it means receiver has redeemed
-                if (receiverFirstNft.ownerOf(receiverFirstOfferItem.tokenId) != address(this)) {
-                    delete offers[offerId];
-                }
-                // @dev If offer was OPEN, receiver has not escrowed, we can safely delete
-            } else {
-                delete offers[offerId];
-            }
             _withdraw(offer.senderItems, offer.sender);
         } else {
-            // @dev We need to check if sender has redeemed too
-            OfferItem memory senderFirstOfferItem = offer.senderItems.items[0];
-            ERC721 senderFirstNft = ERC721(senderFirstOfferItem.tokenAddress);
-            // @dev if Echo is not the owner, it means sender has redeemed
-            if (senderFirstNft.ownerOf(senderFirstOfferItem.tokenId) != address(this)) {
-                delete offers[offerId];
-            }
             _withdraw(offer.receiverItems, offer.receiver);
         }
         emit OfferRedeeemed(offerId, msg.sender);

@@ -6,7 +6,7 @@ import "../lib/blast/IBlast.sol";
 import "../lib/blast/IBlastPoints.sol";
 
 contract EchoBlast is Echo {
-    IBlast public constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast private constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
 
     constructor(address owner, address blastPointsAddress) Echo(owner) {
         IBlastPoints(blastPointsAddress).configurePointsOperator(owner);
@@ -14,7 +14,7 @@ contract EchoBlast is Echo {
         BLAST.configureClaimableGas();
     }
 
-    function claimGas() external onlyOwner {
-        BLAST.claimMaxGas(address(this), msg.sender);
+    function claimGas() external onlyOwner returns (uint256) {
+        return BLAST.claimMaxGas(address(this), msg.sender);
     }
 }

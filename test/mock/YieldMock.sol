@@ -2,6 +2,9 @@
 pragma solidity ^0.8.18;
 
 contract YieldMock {
+    // Exclude from coverage report
+    function test() public virtual {}
+
     address private constant blastContract = 0x4300000000000000000000000000000000000002;
 
     mapping(address => uint8) public getConfiguration;

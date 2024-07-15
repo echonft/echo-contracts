@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import "solmate/tokens/ERC721.sol";
+import "../types/OfferItem.sol";
 import "../types/OfferItems.sol";
 
 abstract contract EscrowHandler is ERC721TokenReceiver {
@@ -10,11 +12,24 @@ abstract contract EscrowHandler is ERC721TokenReceiver {
         collection.safeTransferFrom(from, to, id);
     }
 
-    // @dev function to transfer items from an offer type
+    function _transferERC20(address tokenAddress, uint256 amount, address from, address to) internal {
+        if (address(this) == from) {
+            SafeTransferLib.safeTransfer(tokenAddress, to, amount);
+        } else {
+            SafeTransferLib.safeTransferFrom(tokenAddress, from, to, amount);
+        }
+    }
+
+    // @dev function to transfer items from an offer type. We check for the amount to distinguish ERC20
     function _transferOfferItems(OfferItems memory offerItems, address from, address to) internal {
         uint256 length = offerItems.items.length;
         for (uint256 i = 0; i < length;) {
-            _transferERC721(offerItems.items[i].tokenAddress, offerItems.items[i].tokenId, from, to);
+            OfferItem memory item = offerItems.items[i];
+            if (item.tokenType == TokenType.ERC20) {
+                _transferERC20(item.tokenAddress, item.tokenIdOrAmount, from, to);
+            } else {
+                _transferERC721(item.tokenAddress, item.tokenIdOrAmount, from, to);
+            }
             unchecked {
                 i++;
             }
