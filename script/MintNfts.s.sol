@@ -9,33 +9,43 @@ contract MintNfts is Script {
     function test() public {}
 
     function run() external {
-        vm.startBroadcast();
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address minter = address(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af);
 
-        // Use existing contract
-        Mocked721 YKPS = Mocked721(0xcFCEe3d83eac17bCaB91290c89f4B26Ce82f0238);
+        Mocked721 CBC = Mocked721(0xd91303F46C3f4883D9D74c703C15948e5E04E110);
+        Mocked721 BAYC = Mocked721(0x43bE93945E168A205D708F1A41A124fA302e1f76);
+        Mocked721 SORA = Mocked721(0x07d31999C2BAe29086133A5C93b07a481c5dDaea);
+        Mocked721 MAYC = Mocked721(0x4B8c2CE024D1cC1CFaE7FaA4A162bBfeAdBaEB41);
 
-        YKPS.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 10);
-        YKPS.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 23);
-        YKPS.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 44);
-        YKPS.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 534);
-        YKPS.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 1203);
+        // Mint NFTs
+        //CBC
+        CBC.safeMint(minter, 10);
+        CBC.safeMint(minter, 11);
+        CBC.safeMint(minter, 12);
+        CBC.safeMint(minter, 13);
+        CBC.safeMint(minter, 14);
 
-        YKPS.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 3);
-        YKPS.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 123);
-        YKPS.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 454);
+        // BAYC
+        BAYC.safeMint(minter, 10);
+        BAYC.safeMint(minter, 11);
+        BAYC.safeMint(minter, 12);
+        BAYC.safeMint(minter, 13);
+        BAYC.safeMint(minter, 14);
 
-        // Use existing contract
-        Mocked721 MAD = Mocked721(0xcb4d0fB16C735d2d41D050F14982fd782FA32a5B);
+        // SORA
+        SORA.safeMint(minter, 10);
+        SORA.safeMint(minter, 11);
+        SORA.safeMint(minter, 12);
+        SORA.safeMint(minter, 13);
+        SORA.safeMint(minter, 14);
 
-        MAD.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 31);
-        MAD.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 532);
-        MAD.safeMint(0x1D16E74EC651538aF22F4Ce59bB58Cb4a3E32898, 123);
-
-        MAD.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 5);
-        MAD.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 63);
-        MAD.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 324);
-        MAD.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 65);
-        MAD.safeMint(0x20F039821DE7Db6f543c7C07D419800Eb9Bd01Af, 767);
+        // MAYC
+        MAYC.safeMint(minter, 10);
+        MAYC.safeMint(minter, 11);
+        MAYC.safeMint(minter, 12);
+        MAYC.safeMint(minter, 13);
+        MAYC.safeMint(minter, 14);
 
         vm.stopBroadcast();
     }

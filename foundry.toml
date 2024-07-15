@@ -17,3 +17,14 @@ fuzz_runs = 1000
 verbosity = 4
 
 gas_reports = ["Echo"]
+
+# Config
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+blast_sepolia = "${BLAST_SEPOLIA_RPC_URL}"
+blast = "${BLAST_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+blast_sepolia = { key = "${BLASTSCAN_API_KEY}", url="https://api-sepolia.blastscan.io/api" }
+blast = { key = "${BLASTSCAN_API_KEY}", url="https://api.blastscan.io/api" }
